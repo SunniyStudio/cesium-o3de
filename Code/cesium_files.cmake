@@ -132,6 +132,8 @@ set(FILES
     Source/Cesium/Components/GoogleMapsRasterOverlayComponent.cpp
     Include/Cesium/Components/AzureMapsRasterOverlayComponent.h
     Source/Cesium/Components/AzureMapsRasterOverlayComponent.cpp
+    Include/Cesium/Components/PolygonRasterOverlayComponent.h
+    Source/Cesium/Components/PolygonRasterOverlayComponent.cpp
     Include/Cesium/Components/TilesetComponent.h
     Source/Cesium/Components/TilesetComponent.cpp
     Include/Cesium/Components/CesiumMetadataComponent.h

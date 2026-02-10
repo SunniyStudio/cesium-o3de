@@ -14,6 +14,7 @@
 #include <Cesium/Components/UrlTemplateRasterOverlayComponent.h>
 #include <Cesium/Components/GoogleMapsRasterOverlayComponent.h>
 #include <Cesium/Components/AzureMapsRasterOverlayComponent.h>
+#include <Cesium/Components/PolygonRasterOverlayComponent.h>
 #include <Cesium/Components/CesiumMetadataComponent.h>
 #include <Cesium/Components/CesiumTilesetPhysicsComponent.h>
 #include "Cesium/Components/DynamicUiImageComponent.h"
@@ -46,6 +47,7 @@ namespace Cesium
                   WMTSRasterOverlayComponent::CreateDescriptor(),                   UrlTemplateRasterOverlayComponent::CreateDescriptor(),
                   GoogleMapsRasterOverlayComponent::CreateDescriptor(),
                   AzureMapsRasterOverlayComponent::CreateDescriptor(),
+                  PolygonRasterOverlayComponent::CreateDescriptor(),
                   CesiumMetadataComponent::CreateDescriptor(),
                   CesiumTilesetPhysicsComponent::CreateDescriptor() });
         }

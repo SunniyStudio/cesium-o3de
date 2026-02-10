@@ -40,6 +40,8 @@ set(FILES
     Source/Editor/Components/GoogleMapsRasterOverlayEditorComponent.cpp
     Source/Editor/Components/AzureMapsRasterOverlayEditorComponent.h
     Source/Editor/Components/AzureMapsRasterOverlayEditorComponent.cpp
+    Source/Editor/Components/PolygonRasterOverlayEditorComponent.h
+    Source/Editor/Components/PolygonRasterOverlayEditorComponent.cpp
     Source/Editor/Components/GeoReferenceCameraFlyControllerEditor.h
     Source/Editor/Components/GeoReferenceCameraFlyControllerEditor.cpp
     Source/Editor/Components/TilesetCreditEditorComponent.h

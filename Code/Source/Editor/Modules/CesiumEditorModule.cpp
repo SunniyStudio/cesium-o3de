@@ -10,6 +10,7 @@
 #include "Editor/Components/UrlTemplateRasterOverlayEditorComponent.h"
 #include "Editor/Components/GoogleMapsRasterOverlayEditorComponent.h"
 #include "Editor/Components/AzureMapsRasterOverlayEditorComponent.h"
+#include "Editor/Components/PolygonRasterOverlayEditorComponent.h"
 #include "Editor/Components/TilesetCreditEditorComponent.h"
 #include "Editor/Components/GeoreferenceAnchorEditorComponent.h"
 #include "Editor/Components/OriginShiftEditorComponent.h"
@@ -37,7 +38,8 @@ namespace Cesium
                   BingRasterOverlayEditorComponent::CreateDescriptor(), CesiumIonRasterOverlayEditorComponent::CreateDescriptor(),
                   TMSRasterOverlayEditorComponent::CreateDescriptor(), WMSRasterOverlayEditorComponent::CreateDescriptor(),
                   WMTSRasterOverlayEditorComponent::CreateDescriptor(), UrlTemplateRasterOverlayEditorComponent::CreateDescriptor(),
-                  GoogleMapsRasterOverlayEditorComponent::CreateDescriptor(), AzureMapsRasterOverlayEditorComponent::CreateDescriptor() });
+                  GoogleMapsRasterOverlayEditorComponent::CreateDescriptor(), AzureMapsRasterOverlayEditorComponent::CreateDescriptor(),
+                  PolygonRasterOverlayEditorComponent::CreateDescriptor() });
         }
 
         /**
