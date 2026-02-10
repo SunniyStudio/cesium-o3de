@@ -70,61 +70,64 @@ namespace Cesium
                 return false;
             }
 
-            // Extract tile center in cartographic (lon/lat radians)
-            double centerLon = 0.0, centerLat = 0.0;
-            bool hasCenter = false;
+            // Extract tile bounding corners in cartographic coordinates.
+            // We sample multiple points (center + corners) to determine containment.
+            AZStd::vector<glm::dvec2> tileCartPoints; // (lon, lat) in radians
+            double tileAngularSize = 0.0; // approximate tile size in radians
 
             const auto& bv = tile.getBoundingVolume();
 
             if (const auto* pRegion = std::get_if<CesiumGeospatial::BoundingRegion>(&bv))
             {
-                const auto& rect = pRegion->getRectangle();
-                centerLon = (rect.getWest() + rect.getEast()) * 0.5;
-                centerLat = (rect.getSouth() + rect.getNorth()) * 0.5;
-                hasCenter = true;
+                const auto& r = pRegion->getRectangle();
+                tileCartPoints.push_back({ (r.getWest() + r.getEast()) * 0.5, (r.getSouth() + r.getNorth()) * 0.5 }); // center
+                tileCartPoints.push_back({ r.getWest(), r.getSouth() }); // SW
+                tileCartPoints.push_back({ r.getEast(), r.getSouth() }); // SE
+                tileCartPoints.push_back({ r.getEast(), r.getNorth() }); // NE
+                tileCartPoints.push_back({ r.getWest(), r.getNorth() }); // NW
+                tileAngularSize = std::max(r.getEast() - r.getWest(), r.getNorth() - r.getSouth());
             }
             else if (const auto* pObb = std::get_if<CesiumGeometry::OrientedBoundingBox>(&bv))
             {
-                // OBB center is in ECEF; convert to cartographic
-                const glm::dvec3& ecefCenter = pObb->getCenter();
-                auto cartOpt = CesiumGeospatial::Ellipsoid::WGS84.cartesianToCartographic(ecefCenter);
-                if (cartOpt)
-                {
-                    centerLon = cartOpt->longitude;
-                    centerLat = cartOpt->latitude;
-                    hasCenter = true;
-                }
+                GetObbCartographicPoints(*pObb, tileCartPoints, tileAngularSize);
             }
             else if (const auto* pSphere = std::get_if<CesiumGeometry::BoundingSphere>(&bv))
             {
-                // Sphere center is in ECEF; convert to cartographic
-                const glm::dvec3& ecefCenter = pSphere->getCenter();
-                auto cartOpt = CesiumGeospatial::Ellipsoid::WGS84.cartesianToCartographic(ecefCenter);
-                if (cartOpt)
-                {
-                    centerLon = cartOpt->longitude;
-                    centerLat = cartOpt->latitude;
-                    hasCenter = true;
-                }
+                GetSphereCartographicPoints(*pSphere, tileCartPoints, tileAngularSize);
             }
 
-            if (!hasCenter)
+            if (tileCartPoints.empty())
             {
                 return false;
             }
 
-            // Check tile center against each polygon
             for (const auto& polyBounds : m_polygons)
             {
-                // Quick rejection: is center inside polygon's bounding rectangle?
-                if (centerLon < polyBounds.m_bounds.getWest() || centerLon > polyBounds.m_bounds.getEast() ||
-                    centerLat < polyBounds.m_bounds.getSouth() || centerLat > polyBounds.m_bounds.getNorth())
+                // Quick rejection: is tile center inside polygon's bounding rectangle?
+                const auto& center = tileCartPoints[0];
+                if (center.x < polyBounds.m_bounds.getWest() - tileAngularSize ||
+                    center.x > polyBounds.m_bounds.getEast() + tileAngularSize ||
+                    center.y < polyBounds.m_bounds.getSouth() - tileAngularSize ||
+                    center.y > polyBounds.m_bounds.getNorth() + tileAngularSize)
                 {
                     continue;
                 }
 
-                // Center is within polygon's bounding box - do point-in-polygon test
-                if (PointInPolygon(centerLon, centerLat, polyBounds.m_polygon))
+                // Count how many sample points are inside the polygon
+                int insideCount = 0;
+                for (const auto& pt : tileCartPoints)
+                {
+                    if (PointInPolygon(pt.x, pt.y, polyBounds.m_polygon))
+                    {
+                        ++insideCount;
+                    }
+                }
+
+                // Only exclude if ALL sample points are inside the polygon.
+                // This ensures we only exclude tiles fully contained within the polygon,
+                // allowing partially overlapping tiles to remain (they will subdivide
+                // into smaller children that can be individually tested).
+                if (insideCount == static_cast<int>(tileCartPoints.size()))
                 {
                     return !polyBounds.m_invertSelection;
                 }
@@ -134,6 +137,89 @@ namespace Cesium
         }
 
     private:
+        //! Extract cartographic sample points from an OrientedBoundingBox.
+        static void GetObbCartographicPoints(
+            const CesiumGeometry::OrientedBoundingBox& obb,
+            AZStd::vector<glm::dvec2>& outPoints,
+            double& outAngularSize)
+        {
+            const glm::dvec3& center = obb.getCenter();
+            const glm::dmat3& halfAxes = obb.getHalfAxes();
+
+            // Sample center and 8 corners of the OBB
+            glm::dvec3 corners[9];
+            corners[0] = center; // center first
+            int idx = 1;
+            for (int sx = -1; sx <= 1; sx += 2)
+            {
+                for (int sy = -1; sy <= 1; sy += 2)
+                {
+                    for (int sz = -1; sz <= 1; sz += 2)
+                    {
+                        corners[idx++] = center +
+                            halfAxes[0] * static_cast<double>(sx) +
+                            halfAxes[1] * static_cast<double>(sy) +
+                            halfAxes[2] * static_cast<double>(sz);
+                    }
+                }
+            }
+
+            double minLon = 1e30, maxLon = -1e30, minLat = 1e30, maxLat = -1e30;
+            for (int i = 0; i < 9; ++i)
+            {
+                auto cartOpt = CesiumGeospatial::Ellipsoid::WGS84.cartesianToCartographic(corners[i]);
+                if (cartOpt)
+                {
+                    outPoints.push_back({ cartOpt->longitude, cartOpt->latitude });
+                    if (i > 0) // skip center for size calculation
+                    {
+                        minLon = std::min(minLon, cartOpt->longitude);
+                        maxLon = std::max(maxLon, cartOpt->longitude);
+                        minLat = std::min(minLat, cartOpt->latitude);
+                        maxLat = std::max(maxLat, cartOpt->latitude);
+                    }
+                }
+            }
+            outAngularSize = std::max(maxLon - minLon, maxLat - minLat);
+        }
+
+        //! Extract cartographic sample points from a BoundingSphere.
+        static void GetSphereCartographicPoints(
+            const CesiumGeometry::BoundingSphere& sphere,
+            AZStd::vector<glm::dvec2>& outPoints,
+            double& outAngularSize)
+        {
+            const glm::dvec3& center = sphere.getCenter();
+            double radius = sphere.getRadius();
+
+            // Sample center + 4 cardinal directions on the sphere surface
+            glm::dvec3 samples[5] = {
+                center,
+                center + glm::dvec3(radius, 0, 0),
+                center - glm::dvec3(radius, 0, 0),
+                center + glm::dvec3(0, radius, 0),
+                center - glm::dvec3(0, radius, 0),
+            };
+
+            double minLon = 1e30, maxLon = -1e30, minLat = 1e30, maxLat = -1e30;
+            for (int i = 0; i < 5; ++i)
+            {
+                auto cartOpt = CesiumGeospatial::Ellipsoid::WGS84.cartesianToCartographic(samples[i]);
+                if (cartOpt)
+                {
+                    outPoints.push_back({ cartOpt->longitude, cartOpt->latitude });
+                    if (i > 0)
+                    {
+                        minLon = std::min(minLon, cartOpt->longitude);
+                        maxLon = std::max(maxLon, cartOpt->longitude);
+                        minLat = std::min(minLat, cartOpt->latitude);
+                        maxLat = std::max(maxLat, cartOpt->latitude);
+                    }
+                }
+            }
+            outAngularSize = std::max(maxLon - minLon, maxLat - minLat);
+        }
+
         //! Ray-casting point-in-polygon test.
         static bool PointInPolygon(
             double lon, double lat,
