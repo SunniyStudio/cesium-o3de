@@ -16,6 +16,8 @@
 #include <Cesium/Components/AzureMapsRasterOverlayComponent.h>
 #include <Cesium/Components/PolygonRasterOverlayComponent.h>
 #include <Cesium/Components/GeoJsonRasterOverlayComponent.h>
+#include <Cesium/Components/CartographicPolygonComponent.h>
+#include <Cesium/Components/CesiumTileExcluderComponent.h>
 #include <Cesium/Components/CesiumMetadataComponent.h>
 #include <Cesium/Components/CesiumTilesetPhysicsComponent.h>
 #include "Cesium/Components/DynamicUiImageComponent.h"
@@ -50,6 +52,8 @@ namespace Cesium
                   AzureMapsRasterOverlayComponent::CreateDescriptor(),
                   PolygonRasterOverlayComponent::CreateDescriptor(),
                   GeoJsonRasterOverlayComponent::CreateDescriptor(),
+                  CartographicPolygonComponent::CreateDescriptor(),
+                  CesiumTileExcluderComponent::CreateDescriptor(),
                   CesiumMetadataComponent::CreateDescriptor(),
                   CesiumTilesetPhysicsComponent::CreateDescriptor() });
         }

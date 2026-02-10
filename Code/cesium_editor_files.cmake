@@ -44,6 +44,10 @@ set(FILES
     Source/Editor/Components/PolygonRasterOverlayEditorComponent.cpp
     Source/Editor/Components/GeoJsonRasterOverlayEditorComponent.h
     Source/Editor/Components/GeoJsonRasterOverlayEditorComponent.cpp
+    Source/Editor/Components/CartographicPolygonEditorComponent.h
+    Source/Editor/Components/CartographicPolygonEditorComponent.cpp
+    Source/Editor/Components/CesiumTileExcluderEditorComponent.h
+    Source/Editor/Components/CesiumTileExcluderEditorComponent.cpp
     Source/Editor/Components/GeoReferenceCameraFlyControllerEditor.h
     Source/Editor/Components/GeoReferenceCameraFlyControllerEditor.cpp
     Source/Editor/Components/TilesetCreditEditorComponent.h

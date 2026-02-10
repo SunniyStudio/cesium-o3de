@@ -1,6 +1,7 @@
 #include <Cesium/Components/TilesetComponent.h>
 #include "Cesium/EBus/RasterOverlayContainerBus.h"
 #include "Cesium/EBus/TilesetMetadataAccessBus.h"
+#include "Cesium/EBus/TilesetExcluderBus.h"
 #include "Cesium/TilesetUtility/RenderResourcesPreparer.h"
 #include "Cesium/TilesetUtility/TilesetCameraConfigurations.h"
 #include "Cesium/Systems/CesiumSystem.h"
@@ -26,6 +27,7 @@
 #include <Cesium3DTilesSelection/Tileset.h>
 #include <Cesium3DTilesSelection/TilesetExternals.h>
 #include <Cesium3DTilesSelection/RasterOverlay.h>
+#include <Cesium3DTilesSelection/ITileExcluder.h>
 
 #ifdef AZ_COMPILER_MSVC
 #pragma pop_macro("OPAQUE")
@@ -36,6 +38,7 @@ namespace Cesium
     struct TilesetComponent::Impl
         : public RasterOverlayContainerRequestBus::Handler
         , public TilesetMetadataAccessBus::Handler
+        , public TilesetExcluderBus::Handler
     {
         enum ConfigurationDirtyFlags
         {
@@ -60,10 +63,12 @@ namespace Cesium
 
             RasterOverlayContainerRequestBus::Handler::BusConnect(m_selfEntity);
             TilesetMetadataAccessBus::Handler::BusConnect(m_selfEntity);
+            TilesetExcluderBus::Handler::BusConnect(m_selfEntity);
         }
 
         ~Impl() noexcept
         {
+            TilesetExcluderBus::Handler::BusDisconnect();
             TilesetMetadataAccessBus::Handler::BusDisconnect();
             RasterOverlayContainerRequestBus::Handler::BusDisconnect();
             m_rasterOverlayContainerUnloadedEvent.Signal();
@@ -192,6 +197,43 @@ namespace Cesium
         void BindContainerUnloadedEvent(RasterOverlayContainerUnloadedEvent::Handler& handler) override
         {
             handler.Connect(m_rasterOverlayContainerUnloadedEvent);
+        }
+
+        // TilesetExcluderBus implementation
+        void AddTileExcluder(std::shared_ptr<Cesium3DTilesSelection::ITileExcluder> excluder) override
+        {
+            if (m_tileset && excluder)
+            {
+                auto& excluders = m_tileset->getOptions().excluders;
+                // Avoid duplicates
+                for (const auto& existing : excluders)
+                {
+                    if (existing == excluder)
+                    {
+                        return;
+                    }
+                }
+                excluders.push_back(excluder);
+            }
+        }
+
+        void RemoveTileExcluder(std::shared_ptr<Cesium3DTilesSelection::ITileExcluder> excluder) override
+        {
+            if (m_tileset && excluder)
+            {
+                auto& excluders = m_tileset->getOptions().excluders;
+                excluders.erase(
+                    std::remove(excluders.begin(), excluders.end(), excluder),
+                    excluders.end());
+            }
+        }
+
+        void RemoveAllTileExcluders() override
+        {
+            if (m_tileset)
+            {
+                m_tileset->getOptions().excluders.clear();
+            }
         }
 
         AZStd::vector<TilesetMetadataAccessRequest::TileMetadataEntry> GetLoadedTilesWithMetadata() const override

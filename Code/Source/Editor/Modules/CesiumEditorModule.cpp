@@ -12,6 +12,8 @@
 #include "Editor/Components/AzureMapsRasterOverlayEditorComponent.h"
 #include "Editor/Components/PolygonRasterOverlayEditorComponent.h"
 #include "Editor/Components/GeoJsonRasterOverlayEditorComponent.h"
+#include "Editor/Components/CartographicPolygonEditorComponent.h"
+#include "Editor/Components/CesiumTileExcluderEditorComponent.h"
 #include "Editor/Components/TilesetCreditEditorComponent.h"
 #include "Editor/Components/GeoreferenceAnchorEditorComponent.h"
 #include "Editor/Components/OriginShiftEditorComponent.h"
@@ -41,7 +43,9 @@ namespace Cesium
                   WMTSRasterOverlayEditorComponent::CreateDescriptor(), UrlTemplateRasterOverlayEditorComponent::CreateDescriptor(),
                   GoogleMapsRasterOverlayEditorComponent::CreateDescriptor(), AzureMapsRasterOverlayEditorComponent::CreateDescriptor(),
                   PolygonRasterOverlayEditorComponent::CreateDescriptor(),
-                  GeoJsonRasterOverlayEditorComponent::CreateDescriptor() });
+                  GeoJsonRasterOverlayEditorComponent::CreateDescriptor(),
+                  CartographicPolygonEditorComponent::CreateDescriptor(),
+                  CesiumTileExcluderEditorComponent::CreateDescriptor() });
         }
 
         /**

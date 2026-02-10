@@ -136,6 +136,13 @@ set(FILES
     Source/Cesium/Components/PolygonRasterOverlayComponent.cpp
     Include/Cesium/Components/GeoJsonRasterOverlayComponent.h
     Source/Cesium/Components/GeoJsonRasterOverlayComponent.cpp
+    Include/Cesium/EBus/CartographicPolygonComponentBus.h
+    Source/Cesium/EBus/CartographicPolygonComponentBus.cpp
+    Source/Cesium/EBus/TilesetExcluderBus.h
+    Include/Cesium/Components/CartographicPolygonComponent.h
+    Source/Cesium/Components/CartographicPolygonComponent.cpp
+    Include/Cesium/Components/CesiumTileExcluderComponent.h
+    Source/Cesium/Components/CesiumTileExcluderComponent.cpp
     Include/Cesium/Components/TilesetComponent.h
     Source/Cesium/Components/TilesetComponent.cpp
     Include/Cesium/Components/CesiumMetadataComponent.h

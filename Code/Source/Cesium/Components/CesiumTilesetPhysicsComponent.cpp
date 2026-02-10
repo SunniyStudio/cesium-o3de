@@ -54,15 +54,23 @@ namespace Cesium
 
         //! Extract all triangle mesh data from a CesiumGltf::Model.
         //! Vertices are converted to O3DE coordinate space.
-        ExtractedMeshData ExtractMeshData(const CesiumGltf::Model& model, bool doubleSided)
+        ExtractedMeshData ExtractMeshData(const CesiumGltf::Model* modelPtr, bool doubleSided)
         {
             ExtractedMeshData result;
 
+            if (!modelPtr || modelPtr->meshes.empty())
+            {
+                return result;
+            }
+
+            const auto& model = *modelPtr;
             for (const auto& mesh : model.meshes)
             {
                 for (const auto& primitive : mesh.primitives)
                 {
-                    if (primitive.mode != CesiumGltf::MeshPrimitive::Mode::TRIANGLES)
+                    // Safety check: mode field could be invalid if model is partially loaded
+                    int32_t mode = primitive.mode;
+                    if (mode != CesiumGltf::MeshPrimitive::Mode::TRIANGLES)
                     {
                         continue;
                     }
@@ -74,7 +82,13 @@ namespace Cesium
                         continue;
                     }
 
-                    CesiumGltf::AccessorView<glm::vec3> posView(model, posIt->second);
+                    int32_t posAccessorIndex = posIt->second;
+                    if (posAccessorIndex < 0 || static_cast<size_t>(posAccessorIndex) >= model.accessors.size())
+                    {
+                        continue;
+                    }
+
+                    CesiumGltf::AccessorView<glm::vec3> posView(model, posAccessorIndex);
                     if (posView.status() != CesiumGltf::AccessorViewStatus::Valid || posView.size() == 0)
                     {
                         continue;
@@ -95,7 +109,7 @@ namespace Cesium
                     }
 
                     // Add indices
-                    if (primitive.indices >= 0)
+                    if (primitive.indices >= 0 && static_cast<size_t>(primitive.indices) < model.accessors.size())
                     {
                         const auto& accessor = model.accessors[primitive.indices];
 
@@ -263,8 +277,8 @@ namespace Cesium
                 return false;
             }
 
-            // Extract mesh data
-            ExtractedMeshData meshData = ExtractMeshData(*sourceModel, config.m_doubleSided);
+            // Extract mesh data (pass pointer, null-checked inside)
+            ExtractedMeshData meshData = ExtractMeshData(sourceModel, config.m_doubleSided);
             if (meshData.m_vertices.empty() || meshData.m_indices.empty())
             {
                 return false;
@@ -639,6 +653,12 @@ namespace Cesium
 
             // Verify the tile is still loaded
             if (currentTileKeys.find(pending.m_key) == currentTileKeys.end())
+            {
+                continue;
+            }
+
+            // Safety: validate pointers before accessing
+            if (!pending.m_sourceModel || !pending.m_renderModel)
             {
                 continue;
             }
