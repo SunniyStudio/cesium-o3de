@@ -482,13 +482,16 @@ namespace Cesium
         incompatible.push_back(AZ_CRC_CE("CesiumMetadataService"));
     }
 
-    void CesiumMetadataComponent::GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required)
+    void CesiumMetadataComponent::GetRequiredServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& required)
     {
-        required.push_back(AZ_CRC_CE("3DTilesService"));
+        // No hard requirement — editor uses "3DTilesEditorService", runtime uses "3DTilesService".
+        // Activation order is handled via GetDependentServices.
     }
 
-    void CesiumMetadataComponent::GetDependentServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& dependent)
+    void CesiumMetadataComponent::GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent)
     {
+        dependent.push_back(AZ_CRC_CE("3DTilesService"));
+        dependent.push_back(AZ_CRC_CE("3DTilesEditorService"));
     }
 
     CesiumMetadataComponent::CesiumMetadataComponent() = default;

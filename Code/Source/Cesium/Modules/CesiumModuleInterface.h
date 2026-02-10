@@ -10,6 +10,7 @@
 #include <Cesium/Components/BingRasterOverlayComponent.h>
 #include <Cesium/Components/TMSRasterOverlayComponent.h>
 #include <Cesium/Components/CesiumMetadataComponent.h>
+#include <Cesium/Components/CesiumTilesetPhysicsComponent.h>
 #include "Cesium/Components/DynamicUiImageComponent.h"
 #include "Cesium/Components/CesiumSystemComponent.h"
 #include <AzCore/Memory/SystemAllocator.h>
@@ -36,7 +37,8 @@ namespace Cesium
                   TilesetCreditComponent::CreateDescriptor(), TilesetComponent::CreateDescriptor(), GltfModelComponent::CreateDescriptor(),
                   GeoReferenceCameraFlyController::CreateDescriptor(), RasterOverlayComponent::CreateDescriptor(),
                   BingRasterOverlayComponent::CreateDescriptor(), CesiumIonRasterOverlayComponent::CreateDescriptor(),
-                  TMSRasterOverlayComponent::CreateDescriptor(), CesiumMetadataComponent::CreateDescriptor() });
+                  TMSRasterOverlayComponent::CreateDescriptor(), CesiumMetadataComponent::CreateDescriptor(),
+                  CesiumTilesetPhysicsComponent::CreateDescriptor() });
         }
 
         /**

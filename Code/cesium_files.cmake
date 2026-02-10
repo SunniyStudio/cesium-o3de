@@ -69,6 +69,18 @@ set(FILES
     Source/Cesium/TilesetUtility/RenderResourcesPreparer.h
     Source/Cesium/TilesetUtility/RenderResourcesPreparer.cpp
 
+    Include/Cesium/Metadata/CesiumMetadataValue.h
+    Source/Cesium/Metadata/CesiumMetadataValue.cpp
+    Include/Cesium/Metadata/CesiumFeatureIdSet.h
+    Source/Cesium/Metadata/CesiumFeatureIdSet.cpp
+    Include/Cesium/Metadata/CesiumPropertyTable.h
+    Source/Cesium/Metadata/CesiumPropertyTable.cpp
+
+    Source/Cesium/EBus/TilesetMetadataAccessBus.h
+    Include/Cesium/EBus/CesiumMetadataComponentBus.h
+    Source/Cesium/EBus/CesiumMetadataComponentBus.cpp
+    Include/Cesium/EBus/TilesetPhysicsComponentBus.h
+    Source/Cesium/EBus/TilesetPhysicsComponentBus.cpp
     Source/Cesium/EBus/CesiumSystemComponentBus.h
     Source/Cesium/EBus/CesiumSystemComponentBus.cpp
     Source/Cesium/EBus/DynamicUiImageComponentBus.h
@@ -112,5 +124,9 @@ set(FILES
     Source/Cesium/Components/GltfModelComponent.cpp
     Include/Cesium/Components/TilesetComponent.h
     Source/Cesium/Components/TilesetComponent.cpp
+    Include/Cesium/Components/CesiumMetadataComponent.h
+    Source/Cesium/Components/CesiumMetadataComponent.cpp
+    Include/Cesium/Components/CesiumTilesetPhysicsComponent.h
+    Source/Cesium/Components/CesiumTilesetPhysicsComponent.cpp
 )
 
