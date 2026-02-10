@@ -8,6 +8,8 @@
 #include "Editor/Components/WMSRasterOverlayEditorComponent.h"
 #include "Editor/Components/WMTSRasterOverlayEditorComponent.h"
 #include "Editor/Components/UrlTemplateRasterOverlayEditorComponent.h"
+#include "Editor/Components/GoogleMapsRasterOverlayEditorComponent.h"
+#include "Editor/Components/AzureMapsRasterOverlayEditorComponent.h"
 #include "Editor/Components/TilesetCreditEditorComponent.h"
 #include "Editor/Components/GeoreferenceAnchorEditorComponent.h"
 #include "Editor/Components/OriginShiftEditorComponent.h"
@@ -34,7 +36,8 @@ namespace Cesium
                   TilesetEditorComponent::CreateDescriptor(), GeoReferenceCameraControllerEditor::CreateDescriptor(),
                   BingRasterOverlayEditorComponent::CreateDescriptor(), CesiumIonRasterOverlayEditorComponent::CreateDescriptor(),
                   TMSRasterOverlayEditorComponent::CreateDescriptor(), WMSRasterOverlayEditorComponent::CreateDescriptor(),
-                  WMTSRasterOverlayEditorComponent::CreateDescriptor(), UrlTemplateRasterOverlayEditorComponent::CreateDescriptor() });
+                  WMTSRasterOverlayEditorComponent::CreateDescriptor(), UrlTemplateRasterOverlayEditorComponent::CreateDescriptor(),
+                  GoogleMapsRasterOverlayEditorComponent::CreateDescriptor(), AzureMapsRasterOverlayEditorComponent::CreateDescriptor() });
         }
 
         /**

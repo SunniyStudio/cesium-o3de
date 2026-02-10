@@ -12,6 +12,8 @@
 #include <Cesium/Components/WMSRasterOverlayComponent.h>
 #include <Cesium/Components/WMTSRasterOverlayComponent.h>
 #include <Cesium/Components/UrlTemplateRasterOverlayComponent.h>
+#include <Cesium/Components/GoogleMapsRasterOverlayComponent.h>
+#include <Cesium/Components/AzureMapsRasterOverlayComponent.h>
 #include <Cesium/Components/CesiumMetadataComponent.h>
 #include <Cesium/Components/CesiumTilesetPhysicsComponent.h>
 #include "Cesium/Components/DynamicUiImageComponent.h"
@@ -41,7 +43,9 @@ namespace Cesium
                   GeoReferenceCameraFlyController::CreateDescriptor(), RasterOverlayComponent::CreateDescriptor(),
                   BingRasterOverlayComponent::CreateDescriptor(), CesiumIonRasterOverlayComponent::CreateDescriptor(),
                   TMSRasterOverlayComponent::CreateDescriptor(), WMSRasterOverlayComponent::CreateDescriptor(),
-                  WMTSRasterOverlayComponent::CreateDescriptor(), UrlTemplateRasterOverlayComponent::CreateDescriptor(),
+                  WMTSRasterOverlayComponent::CreateDescriptor(),                   UrlTemplateRasterOverlayComponent::CreateDescriptor(),
+                  GoogleMapsRasterOverlayComponent::CreateDescriptor(),
+                  AzureMapsRasterOverlayComponent::CreateDescriptor(),
                   CesiumMetadataComponent::CreateDescriptor(),
                   CesiumTilesetPhysicsComponent::CreateDescriptor() });
         }

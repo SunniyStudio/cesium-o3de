@@ -36,6 +36,10 @@ set(FILES
     Source/Editor/Components/WMTSRasterOverlayEditorComponent.cpp
     Source/Editor/Components/UrlTemplateRasterOverlayEditorComponent.h
     Source/Editor/Components/UrlTemplateRasterOverlayEditorComponent.cpp
+    Source/Editor/Components/GoogleMapsRasterOverlayEditorComponent.h
+    Source/Editor/Components/GoogleMapsRasterOverlayEditorComponent.cpp
+    Source/Editor/Components/AzureMapsRasterOverlayEditorComponent.h
+    Source/Editor/Components/AzureMapsRasterOverlayEditorComponent.cpp
     Source/Editor/Components/GeoReferenceCameraFlyControllerEditor.h
     Source/Editor/Components/GeoReferenceCameraFlyControllerEditor.cpp
     Source/Editor/Components/TilesetCreditEditorComponent.h
