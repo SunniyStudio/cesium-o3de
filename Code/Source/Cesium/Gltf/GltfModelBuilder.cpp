@@ -95,7 +95,7 @@ namespace Cesium
         glm::dmat4 worldTransform = option.m_transform * GLTF_TO_O3DE;
         for (std::int32_t rootIndex : scene.nodes)
         {
-            if (rootIndex >= 0 && rootIndex <= model.nodes.size())
+            if (rootIndex >= 0 && static_cast<std::size_t>(rootIndex) < model.nodes.size())
             {
                 LoadNode(model, model.nodes[static_cast<std::size_t>(rootIndex)], worldTransform, result);
             }
@@ -133,7 +133,7 @@ namespace Cesium
             }
         }
 
-        if (node.mesh >= 0 && node.mesh <= model.meshes.size())
+        if (node.mesh >= 0 && static_cast<std::size_t>(node.mesh) < model.meshes.size())
         {
             LoadMesh(model, static_cast<std::size_t>(node.mesh), currentTransform, result);
         }

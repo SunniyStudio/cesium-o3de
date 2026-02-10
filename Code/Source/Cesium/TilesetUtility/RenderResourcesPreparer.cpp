@@ -114,8 +114,9 @@ namespace Cesium
             return;
         }
 
+        std::uint32_t layer = layerIt->second;
         m_rasterOverlayLayers.erase(layerIt);
-        m_freeRasterLayers.emplace_back(layerIt->second);
+        m_freeRasterLayers.emplace_back(layer);
     }
 
     void* RenderResourcesPreparer::prepareInLoadThread(const CesiumGltf::Model& model, const glm::dmat4& transform)

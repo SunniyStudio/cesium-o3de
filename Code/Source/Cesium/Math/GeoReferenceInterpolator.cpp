@@ -75,7 +75,7 @@ namespace Cesium
                 m_flyHeight = glm::distance(begin, destination) * 0.05;
             }
 
-            if (maxHeight < m_flyHeight)
+            if (maxHeight < m_flyHeight && m_flyHeight > 0.0)
             {
                 m_useHeightLerp = false;
                 m_flyPower = 8.0;
@@ -122,7 +122,7 @@ namespace Cesium
             m_isStop = true;
         }
 
-        double t = m_totalTimePassed / m_totalDuration;
+        double t = m_totalDuration > 0.0 ? m_totalTimePassed / m_totalDuration : 1.0;
         double currentLongitude = CesiumUtility::Math::lerp(m_beginLongitude, m_destinationLongitude, t);
         double currentLatitude = CesiumUtility::Math::lerp(m_beginLatitude, m_destinationLatitude, t);
         double currentHeight{};

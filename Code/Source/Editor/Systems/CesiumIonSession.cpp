@@ -265,7 +265,7 @@ namespace Cesium
 
     void CesiumIonSession::RefreshTokens()
     {
-        if (!this->m_connection || this->m_isLoadingAssets)
+        if (!this->m_connection || this->m_isLoadingTokens)
         {
             return;
         }
@@ -340,6 +340,13 @@ namespace Cesium
                         this->m_assetAccessToken = std::move(token.value);
                         this->m_isLoadingAssetAccessToken = false;
                         RefreshAssets();
+                        this->AssetAccessTokenUpdated.Signal();
+                    })
+                .catchInMainThread(
+                    [this](std::exception&&)
+                    {
+                        this->m_isLoadingAssetAccessToken = false;
+                        this->m_assetAccessToken = std::nullopt;
                         this->AssetAccessTokenUpdated.Signal();
                     });
         }

@@ -10,6 +10,7 @@ namespace Cesium
 
     CriticalAssetManager::~CriticalAssetManager() noexcept
     {
+        AzFramework::AssetCatalogEventBus::Handler::BusDisconnect();
         m_standardPbrMaterialType.Release();
         m_rasterMaterialType.Release();
     }

@@ -56,7 +56,7 @@ namespace Cesium
 
     void CesiumIonRasterOverlayEditorComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
     {
-        provided.push_back(AZ_CRC_CE("CesiumIonRasterOverlayEditorSerivce"));
+        provided.push_back(AZ_CRC_CE("CesiumIonRasterOverlayEditorService"));
     }
 
     void CesiumIonRasterOverlayEditorComponent::GetIncompatibleServices(

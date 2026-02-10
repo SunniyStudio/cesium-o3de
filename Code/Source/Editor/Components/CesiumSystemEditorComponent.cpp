@@ -191,6 +191,10 @@ namespace Cesium
                         AZ::Entity* tilesetEntity = nullptr;
                         AZ::ComponentApplicationBus::BroadcastResult(
                             tilesetEntity, &AZ::ComponentApplicationRequests::FindEntity, tilesetEntityId);
+                        if (!tilesetEntity)
+                        {
+                            continue;
+                        }
                         tilesetEntity->SetName(tilesetName);
 
                         // Add 3D Tiles component to the new entity

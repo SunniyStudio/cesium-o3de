@@ -57,7 +57,7 @@ namespace Cesium
         tidyOptSetInt(tdoc, TidyWrapLen, 4096);
         tidySetErrorBuffer(tdoc, &tidy_errbuf);
         tidyBufInit(&docbuf);
-        tidyBufAppend(&docbuf, reinterpret_cast<void*>(const_cast<char*>(html.c_str())), static_cast<uint>(html.size()));
+        tidyBufAppend(&docbuf, reinterpret_cast<void*>(const_cast<char*>(html.c_str())), static_cast<unsigned int>(html.size()));
 
         err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
         if (err >= 0)

@@ -556,7 +556,7 @@ namespace Cesium
             }
 
             const CesiumGltf::Accessor* uvAccessor = model.getSafe<CesiumGltf::Accessor>(&model.accessors, uvAttribute->second);
-            if (uvAccessor->type != CesiumGltf::AccessorSpec::Type::VEC2)
+            if (!uvAccessor || uvAccessor->type != CesiumGltf::AccessorSpec::Type::VEC2)
             {
                 continue;
             }

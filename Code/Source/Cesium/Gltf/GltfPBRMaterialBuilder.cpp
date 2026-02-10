@@ -359,12 +359,16 @@ namespace Cesium
         if (imageData.channels == 3)
         {
             AZStd::vector<std::byte> pixels(width * height * 4);
-            for (std::size_t i = 0; i < imageData.pixelData.size(); i += 3)
+            std::size_t srcIdx = 0;
+            std::size_t dstIdx = 0;
+            while (srcIdx + 2 < imageData.pixelData.size())
             {
-                pixels[i] = imageData.pixelData[i];
-                pixels[i + 1] = imageData.pixelData[i + 1];
-                pixels[i + 2] = imageData.pixelData[i + 2];
-                pixels[i + 3] = static_cast<std::byte>(255);
+                pixels[dstIdx] = imageData.pixelData[srcIdx];
+                pixels[dstIdx + 1] = imageData.pixelData[srcIdx + 1];
+                pixels[dstIdx + 2] = imageData.pixelData[srcIdx + 2];
+                pixels[dstIdx + 3] = static_cast<std::byte>(255);
+                srcIdx += 3;
+                dstIdx += 4;
             }
 
             newImage = Create2DImage(pixels.data(), pixels.size(), width, height, AZ::RHI::Format::R8G8B8A8_UNORM_SRGB);

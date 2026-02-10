@@ -333,16 +333,16 @@ namespace Cesium
         TilesetRequestBus::Handler::BusDisconnect();
     }
 
-    void TilesetComponent::SetConfiguration(const TilesetConfiguration& configration)
+    void TilesetComponent::SetConfiguration(const TilesetConfiguration& configuration)
     {
-        m_tilesetConfiguration = configration;
+        m_tilesetConfiguration = configuration;
         m_impl->m_configFlags |= Impl::ConfigurationDirtyFlags::TilesetConfigChange;
     }
 
-    void TilesetComponent::SetRenderConfiguration(const TilesetRenderConfiguration& configration)
+    void TilesetComponent::SetRenderConfiguration(const TilesetRenderConfiguration& configuration)
     {
         // render config is special, we need to reload tileset, so that all the caches are clear
-        m_renderConfiguration = configration;
+        m_renderConfiguration = configuration;
         m_impl->m_configFlags |= Impl::ConfigurationDirtyFlags::AllChange;
     }
 
@@ -358,7 +358,7 @@ namespace Cesium
 
     AZ::Aabb TilesetComponent::GetWorldBounds() const
     {
-        if (!m_impl->m_tileset)
+        if (!m_impl || !m_impl->m_tileset)
         {
             return AZ::Aabb{};
         }
@@ -374,7 +374,7 @@ namespace Cesium
 
     AZ::Aabb TilesetComponent::GetLocalBounds() const
     {
-        if (!m_impl->m_tileset)
+        if (!m_impl || !m_impl->m_tileset)
         {
             return AZ::Aabb{};
         }
@@ -390,7 +390,7 @@ namespace Cesium
 
     TilesetBoundingVolume TilesetComponent::GetRootBoundingVolumeInECEF() const
     {
-        if (!m_impl->m_tileset)
+        if (!m_impl || !m_impl->m_tileset)
         {
             return std::monostate{};
         }
@@ -406,7 +406,7 @@ namespace Cesium
 
     TilesetBoundingVolume TilesetComponent::GetBoundingVolumeInECEF() const
     {
-        if (!m_impl->m_tileset)
+        if (!m_impl || !m_impl->m_tileset)
         {
             return std::monostate{};
         }
@@ -433,7 +433,7 @@ namespace Cesium
 
     const glm::dmat4* TilesetComponent::GetRootTransform() const
     {
-        if (m_impl->m_tileset)
+        if (m_impl && m_impl->m_tileset)
         {
             auto root = m_impl->m_tileset->getRootTile();
             if (root)

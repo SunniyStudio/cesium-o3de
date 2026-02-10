@@ -125,8 +125,13 @@ namespace Cesium
 
     void RasterOverlayComponent::LoadRasterOverlay()
     {
-        // remove any existing raster
-        Deactivate();
+        // remove any existing raster overlay without fully deactivating the component
+        if (m_impl->m_rasterOverlayObserverPtr)
+        {
+            RasterOverlayContainerRequestBus::Event(
+                GetEntityId(), &RasterOverlayContainerRequestBus::Events::RemoveRasterOverlay, m_impl->m_rasterOverlayObserverPtr);
+            m_impl->m_rasterOverlayObserverPtr = nullptr;
+        }
 
         auto rasterOverlay = LoadRasterOverlayImpl();
         m_impl->m_rasterOverlayObserverPtr = rasterOverlay.get();

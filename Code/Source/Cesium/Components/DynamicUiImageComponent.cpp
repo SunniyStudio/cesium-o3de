@@ -54,7 +54,7 @@ namespace Cesium
     }
 
     DynamicUiImageComponent::DynamicUiImageComponent()
-        : m_asyncSystem{ CesiumInterface::Get()->GetTaskProcessor() }
+        : m_asyncSystem{ CesiumInterface::Get() ? CesiumInterface::Get()->GetTaskProcessor() : nullptr }
     {
     }
 
@@ -86,6 +86,10 @@ namespace Cesium
         }
 
         AZ::EntityId selfEntityId = GetEntityId();
+        if (!CesiumInterface::Get())
+        {
+            return;
+        }
         auto& httpManager = CesiumInterface::Get()->GetIOManager(Cesium::IOKind::Http);
         Cesium::IORequestParameter requestParameter{ url, "" };
         auto future =
@@ -151,6 +155,8 @@ namespace Cesium
 
     void DynamicUiImageComponent::Deactivate()
     {
+        UiCanvasEnabledStateNotificationBus::Handler::BusDisconnect();
+        UiElementNotificationBus::Handler::BusDisconnect();
         DynamicUiImageRequestBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
     }
@@ -205,6 +211,11 @@ namespace Cesium
 
     void DynamicUiImageComponent::ScaleImageToFit()
     {
+        if (m_realImageSize.m_width == 0 || m_realImageSize.m_height == 0)
+        {
+            m_scaledImageSize = AZ::RHI::Size{ 0, 0, 0 };
+            return;
+        }
         float imgScale = static_cast<float>(m_realImageSize.m_width) / static_cast<float>(m_realImageSize.m_height);
         float scaleWidth = static_cast<float>(m_maxSize.m_width) / static_cast<float>(m_realImageSize.m_width);
         float scaleHeight = static_cast<float>(m_maxSize.m_height) / static_cast<float>(m_realImageSize.m_height);

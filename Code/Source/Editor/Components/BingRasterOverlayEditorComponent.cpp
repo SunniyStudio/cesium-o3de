@@ -67,7 +67,7 @@ namespace Cesium
 
     void BingRasterOverlayEditorComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
     {
-        provided.push_back(AZ_CRC_CE("BingRasterOverlayEditorSerivce"));
+        provided.push_back(AZ_CRC_CE("BingRasterOverlayEditorService"));
     }
 
     void BingRasterOverlayEditorComponent::GetIncompatibleServices(

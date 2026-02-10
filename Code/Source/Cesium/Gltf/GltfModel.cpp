@@ -70,6 +70,9 @@ namespace Cesium
         m_meshFeatureProcessor = rhs.m_meshFeatureProcessor;
         m_meshes = std::move(rhs.m_meshes);
         m_materials = std::move(rhs.m_materials);
+
+        rhs.m_meshFeatureProcessor = nullptr;
+        rhs.m_visible = false;
     }
 
     GltfModel& GltfModel::operator=(GltfModel&& rhs) noexcept
@@ -188,7 +191,11 @@ namespace Cesium
         {
             scale[i] = glm::length(mat4[i]);
         }
-        const glm::dmat3 rotMtx(glm::dvec3(mat4[0]) / scale[0], glm::dvec3(mat4[1]) / scale[1], glm::dvec3(mat4[2]) / scale[2]);
+        constexpr double scaleEpsilon = 1e-10;
+        const glm::dmat3 rotMtx(
+            scale[0] > scaleEpsilon ? glm::dvec3(mat4[0]) / scale[0] : glm::dvec3(1.0, 0.0, 0.0),
+            scale[1] > scaleEpsilon ? glm::dvec3(mat4[1]) / scale[1] : glm::dvec3(0.0, 1.0, 0.0),
+            scale[2] > scaleEpsilon ? glm::dvec3(mat4[2]) / scale[2] : glm::dvec3(0.0, 0.0, 1.0));
         glm::dquat quarternion = glm::quat_cast(rotMtx);
         AZ::Quaternion o3deQuarternion{ static_cast<float>(quarternion.x), static_cast<float>(quarternion.y),
                                         static_cast<float>(quarternion.z), static_cast<float>(quarternion.w) };

@@ -16,8 +16,10 @@ namespace Cesium
         const glm::dmat3& halfLengthsAndOrientation = box.getHalfAxes();
         glm::dvec3 halfLength{ glm::length(halfLengthsAndOrientation[0]), glm::length(halfLengthsAndOrientation[1]),
                                glm::length(halfLengthsAndOrientation[2]) };
-        glm::dmat3 orientation{ halfLengthsAndOrientation[0] / halfLength.x, halfLengthsAndOrientation[1] / halfLength.y,
-                                halfLengthsAndOrientation[2] / halfLength.z };
+        constexpr double epsilon = 1e-10;
+        glm::dmat3 orientation{ halfLength.x > epsilon ? halfLengthsAndOrientation[0] / halfLength.x : glm::dvec3(1.0, 0.0, 0.0),
+                                halfLength.y > epsilon ? halfLengthsAndOrientation[1] / halfLength.y : glm::dvec3(0.0, 1.0, 0.0),
+                                halfLength.z > epsilon ? halfLengthsAndOrientation[2] / halfLength.z : glm::dvec3(0.0, 0.0, 1.0) };
         return OrientedBoundingBox{ center, glm::dquat(orientation), halfLength };
     }
 
@@ -112,8 +114,10 @@ namespace Cesium
         glm::dmat3 halfLengthsAndOrientation = glm::dmat3(m_transform) * box.getHalfAxes();
         glm::dvec3 halfLength{ glm::length(halfLengthsAndOrientation[0]), glm::length(halfLengthsAndOrientation[1]),
                                glm::length(halfLengthsAndOrientation[2]) };
-        glm::dmat3 orientation{ halfLengthsAndOrientation[0] / halfLength.x, halfLengthsAndOrientation[1] / halfLength.y,
-                                halfLengthsAndOrientation[2] / halfLength.z };
+        constexpr double epsilon = 1e-10;
+        glm::dmat3 orientation{ halfLength.x > epsilon ? halfLengthsAndOrientation[0] / halfLength.x : glm::dvec3(1.0, 0.0, 0.0),
+                                halfLength.y > epsilon ? halfLengthsAndOrientation[1] / halfLength.y : glm::dvec3(0.0, 1.0, 0.0),
+                                halfLength.z > epsilon ? halfLengthsAndOrientation[2] / halfLength.z : glm::dvec3(0.0, 0.0, 1.0) };
         return OrientedBoundingBox{ center, glm::dquat(orientation), halfLength };
     }
 

@@ -6,7 +6,12 @@ namespace Cesium
     TaskProcessor::TaskProcessor()
     {
         AZ::JobManagerDesc jobDesc;
-        for (size_t i = 0; i < AZStd::thread::hardware_concurrency(); ++i)
+        size_t numThreads = AZStd::thread::hardware_concurrency();
+        if (numThreads == 0)
+        {
+            numThreads = 2;
+        }
+        for (size_t i = 0; i < numThreads; ++i)
         {
             jobDesc.m_workerThreads.push_back({ static_cast<int>(i) });
         }
@@ -22,7 +27,7 @@ namespace Cesium
 
     void TaskProcessor::startTask(std::function<void()> task)
     {
-        AZ::Job* job = aznew AZ::JobFunction<std::function<void()>>(task, true, nullptr);
+        AZ::Job* job = aznew AZ::JobFunction<std::function<void()>>(task, true, m_jobContext.get());
         job->Start();
     }
 } // namespace Cesium

@@ -58,7 +58,7 @@ namespace Cesium
 
     void TMSRasterOverlayEditorComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
     {
-        provided.push_back(AZ_CRC_CE("TMSRasterOverlayEditorSerivce"));
+        provided.push_back(AZ_CRC_CE("TMSRasterOverlayEditorService"));
     }
 
     void TMSRasterOverlayEditorComponent::GetIncompatibleServices(

@@ -115,7 +115,12 @@ namespace Cesium
     HttpManager::HttpManager()
     {
         AZ::JobManagerDesc jobDesc;
-        for (size_t i = 0; i < AZStd::thread::hardware_concurrency(); ++i)
+        size_t numThreads = AZStd::thread::hardware_concurrency();
+        if (numThreads == 0)
+        {
+            numThreads = 2;
+        }
+        for (size_t i = 0; i < numThreads; ++i)
         {
             jobDesc.m_workerThreads.push_back({ static_cast<int>(i) });
         }
@@ -172,8 +177,12 @@ namespace Cesium
         auto awsHttpRequest =
             Aws::Http::CreateHttpRequest(awsURI, Aws::Http::HttpMethod::HTTP_GET, Aws::Utils::Stream::DefaultResponseStreamFactoryMethod);
 
+        if (!awsHttpRequest)
+        {
+            return {};
+        }
         auto awsHttpResponse = awsHttpClient->MakeRequest(awsHttpRequest);
-        if (!awsHttpRequest || !awsHttpResponse)
+        if (!awsHttpResponse)
         {
             return {};
         }
@@ -218,8 +227,14 @@ namespace Cesium
         {
             content.resize(readSoFar + maxRead);
             ioStream.read(reinterpret_cast<char*>(content.data() + readSoFar), maxRead);
-            readSoFar += maxRead;
+            std::size_t bytesRead = static_cast<std::size_t>(ioStream.gcount());
+            readSoFar += bytesRead;
+            if (bytesRead == 0)
+            {
+                break;
+            }
         }
+        content.resize(readSoFar);
 
         return content;
     }
