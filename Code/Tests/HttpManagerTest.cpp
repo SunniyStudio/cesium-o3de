@@ -1,23 +1,8 @@
 #include "Cesium/Systems/HttpManager.h"
-#include <AzCore/Memory/PoolAllocator.h>
 #include <AzCore/UnitTest/TestTypes.h>
 
-class HttpManagerTest : public UnitTest::AllocatorsTestFixture
+class HttpManagerTest : public UnitTest::LeakDetectionFixture
 {
-public:
-    void SetUp() override
-    {
-        UnitTest::AllocatorsTestFixture::SetUp();
-        AZ::AllocatorInstance<AZ::PoolAllocator>::Create();
-        AZ::AllocatorInstance<AZ::ThreadPoolAllocator>::Create();
-    }
-
-    void TearDown() override
-    {
-        AZ::AllocatorInstance<AZ::ThreadPoolAllocator>::Destroy();
-        AZ::AllocatorInstance<AZ::PoolAllocator>::Destroy();
-        UnitTest::AllocatorsTestFixture::TearDown();
-    }
 };
 
 TEST_F(HttpManagerTest, AddValidRequest)

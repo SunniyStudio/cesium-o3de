@@ -180,7 +180,7 @@ namespace Cesium
             imageDesc.m_size = AZ::RHI::Size(image.width, image.height, 1);
             imageDesc.m_format = AZ::RHI::Format::R8G8B8A8_UNORM_SRGB;
 
-            AZ::RHI::ImageSubresourceLayout imageSubresourceLayout =
+            AZ::RHI::DeviceImageSubresourceLayout imageSubresourceLayout =
                 AZ::RHI::GetImageSubresourceLayout(imageDesc, AZ::RHI::ImageSubresource{});
 
             // Create mip chain

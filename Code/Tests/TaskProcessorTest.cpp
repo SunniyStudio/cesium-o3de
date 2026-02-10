@@ -5,15 +5,11 @@
 #include <AzCore/UnitTest/TestTypes.h>
 #include <future>
 
-class TaskProcessorTest : public UnitTest::AllocatorsTestFixture
+class TaskProcessorTest : public UnitTest::LeakDetectionFixture
 {
 public:
     void SetUp() override
     {
-        UnitTest::AllocatorsTestFixture::SetUp();
-        AZ::AllocatorInstance<AZ::PoolAllocator>::Create();
-        AZ::AllocatorInstance<AZ::ThreadPoolAllocator>::Create();
-
         AZ::JobManagerDesc managerDesc;
         AZ::JobManagerThreadDesc threadDesc;
         std::size_t hardwareConcurrency = AZStd::thread::hardware_concurrency();
@@ -32,9 +28,6 @@ public:
         AZ::JobContext::SetGlobalContext(nullptr);
         delete m_jobContext;
         delete m_jobManager;
-        AZ::AllocatorInstance<AZ::ThreadPoolAllocator>::Destroy();
-        AZ::AllocatorInstance<AZ::PoolAllocator>::Destroy();
-        UnitTest::AllocatorsTestFixture::TearDown();
     }
 
 protected:

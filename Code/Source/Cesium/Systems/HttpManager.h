@@ -6,6 +6,7 @@
 #include <CesiumAsync/AsyncSystem.h>
 #include <CesiumAsync/Future.h>
 #include <CesiumAsync/HttpHeaders.h>
+#include <aws/core/Aws.h>
 #include <aws/core/http/HttpResponse.h>
 
 namespace AZ
@@ -91,6 +92,7 @@ namespace Cesium
         static IOContent GetResponseBodyContent(Aws::Http::HttpResponse& response);
 
     private:
+        Aws::SDKOptions m_awsSdkOptions;
         AZStd::unique_ptr<AZ::JobManager> m_ioJobManager;
         AZStd::unique_ptr<AZ::JobContext> m_ioJobContext;
         std::shared_ptr<Aws::Http::HttpClient> m_awsHttpClient;

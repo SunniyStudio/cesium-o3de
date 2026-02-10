@@ -50,7 +50,7 @@ namespace Cesium
 
         AZ::Data::AssetId materialAssetId = CesiumInterface::Get()->GetCriticalAssetManager().GenerateRandomAssetId();
         AZ::RPI::MaterialAssetCreator materialCreator;
-        materialCreator.Begin(materialAssetId, materialTypeAsset, true);
+        materialCreator.Begin(materialAssetId, materialTypeAsset);
 
         ConfigurePbrMetallicRoughness(model, material, textureCache, materialCreator);
         ConfigureOcclusion(model, material, textureCache, materialCreator);
@@ -460,7 +460,7 @@ namespace Cesium
         imageDesc.m_size = AZ::RHI::Size(width, height, 1);
         imageDesc.m_format = format;
 
-        AZ::RHI::ImageSubresourceLayout imageSubresourceLayout = AZ::RHI::GetImageSubresourceLayout(imageDesc, AZ::RHI::ImageSubresource{});
+        AZ::RHI::DeviceImageSubresourceLayout imageSubresourceLayout = AZ::RHI::GetImageSubresourceLayout(imageDesc, AZ::RHI::ImageSubresource{});
 
         // Create mip chain
         AZ::Data::AssetId imageMipChainAssetId = CesiumInterface::Get()->GetCriticalAssetManager().GenerateRandomAssetId();
