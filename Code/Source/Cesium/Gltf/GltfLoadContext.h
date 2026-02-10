@@ -79,5 +79,9 @@ namespace Cesium
         AZStd::unordered_map<TextureId, GltfLoadTexture> m_textures;
         AZStd::vector<GltfLoadMaterial> m_materials;
         AZStd::vector<GltfLoadMesh> m_meshes;
+
+        //! Pointer to the source CesiumGltf::Model for metadata queries.
+        //! Valid as long as the owning tile is loaded.
+        const void* m_sourceModelPtr = nullptr;
     };
 } // namespace Cesium

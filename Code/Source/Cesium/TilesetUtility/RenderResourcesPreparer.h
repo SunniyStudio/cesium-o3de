@@ -48,6 +48,10 @@ namespace Cesium
 
         GltfModel m_model;
         AZ::StableDynamicArrayHandle<IntrusiveGltfModel> m_self;
+
+        //! Pointer to the source CesiumGltf::Model for metadata queries.
+        //! Valid as long as the owning tile is loaded (between prepareInMainThread and free).
+        const CesiumGltf::Model* m_sourceModel = nullptr;
     };
 
     class RenderResourcesPreparer

@@ -133,6 +133,10 @@ namespace Cesium
         AZStd::unique_ptr<GltfLoadModel> loadModel = AZStd::make_unique<GltfLoadModel>();
         GltfModelBuilder builder(AZStd::make_unique<GltfRasterMaterialBuilder>());
         builder.Create(model, option, *loadModel);
+
+        // Store source model pointer for metadata queries
+        loadModel->m_sourceModelPtr = &model;
+
         return loadModel.release();
     }
 
@@ -147,6 +151,10 @@ namespace Cesium
             intrusiveModel.m_self = std::move(handle);
             intrusiveModel.m_model.SetTransform(m_transform);
             intrusiveModel.m_model.SetVisible(false);
+
+            // Transfer source model pointer for metadata queries
+            intrusiveModel.m_sourceModel = reinterpret_cast<const CesiumGltf::Model*>(loadModel->m_sourceModelPtr);
+
             return &intrusiveModel;
         }
 

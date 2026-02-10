@@ -1,5 +1,6 @@
 #include <Cesium/Components/TilesetComponent.h>
 #include "Cesium/EBus/RasterOverlayContainerBus.h"
+#include "Cesium/EBus/TilesetMetadataAccessBus.h"
 #include "Cesium/TilesetUtility/RenderResourcesPreparer.h"
 #include "Cesium/TilesetUtility/TilesetCameraConfigurations.h"
 #include "Cesium/Systems/CesiumSystem.h"
@@ -32,7 +33,9 @@
 
 namespace Cesium
 {
-    struct TilesetComponent::Impl : public RasterOverlayContainerRequestBus::Handler
+    struct TilesetComponent::Impl
+        : public RasterOverlayContainerRequestBus::Handler
+        , public TilesetMetadataAccessBus::Handler
     {
         enum ConfigurationDirtyFlags
         {
@@ -56,10 +59,12 @@ namespace Cesium
             LoadTileset(tilesetSource, renderConfiguration);
 
             RasterOverlayContainerRequestBus::Handler::BusConnect(m_selfEntity);
+            TilesetMetadataAccessBus::Handler::BusConnect(m_selfEntity);
         }
 
         ~Impl() noexcept
         {
+            TilesetMetadataAccessBus::Handler::BusDisconnect();
             RasterOverlayContainerRequestBus::Handler::BusDisconnect();
             m_rasterOverlayContainerUnloadedEvent.Signal();
             m_tileset.reset();
@@ -187,6 +192,49 @@ namespace Cesium
         void BindContainerUnloadedEvent(RasterOverlayContainerUnloadedEvent::Handler& handler) override
         {
             handler.Connect(m_rasterOverlayContainerUnloadedEvent);
+        }
+
+        AZStd::vector<TilesetMetadataAccessRequest::TileMetadataEntry> GetLoadedTilesWithMetadata() const override
+        {
+            AZStd::vector<TilesetMetadataAccessRequest::TileMetadataEntry> entries;
+            if (!m_tileset || !m_renderResourcesPreparer)
+            {
+                return entries;
+            }
+
+            // Iterate all tiles that have render resources (loaded tiles)
+            // Use a generic lambda that captures itself via the auto& self parameter
+            auto collectTileMetadata = [&entries](Cesium3DTilesSelection::Tile& tile, auto& self) -> void
+            {
+                if (tile.getState() == Cesium3DTilesSelection::Tile::LoadState::Done)
+                {
+                    void* renderResources = tile.getRendererResources();
+                    if (renderResources)
+                    {
+                        IntrusiveGltfModel* intrusiveModel = reinterpret_cast<IntrusiveGltfModel*>(renderResources);
+                        if (intrusiveModel->m_sourceModel)
+                        {
+                            TilesetMetadataAccessRequest::TileMetadataEntry entry;
+                            entry.m_sourceModel = intrusiveModel->m_sourceModel;
+                            entry.m_renderModel = intrusiveModel;
+                            entries.push_back(entry);
+                        }
+                    }
+                }
+
+                for (auto& child : tile.getChildren())
+                {
+                    self(child, self);
+                }
+            };
+
+            auto* rootTile = m_tileset->getRootTile();
+            if (rootTile)
+            {
+                collectTileMetadata(*rootTile, collectTileMetadata);
+            }
+
+            return entries;
         }
 
         void FlushTilesetSourceChange(const TilesetSource& source, const TilesetRenderConfiguration& renderConfiguration)
