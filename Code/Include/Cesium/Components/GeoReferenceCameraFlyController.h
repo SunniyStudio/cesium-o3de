@@ -74,7 +74,7 @@ namespace Cesium
 
         void ProcessMidFlyState(float deltaTime);
 
-        void ProcessNoFlyState();
+        void ProcessNoFlyState(float deltaTime);
 
         bool OnInputChannelEventFiltered(const AzFramework::InputChannel& inputChannel) override;
 

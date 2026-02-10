@@ -7,28 +7,29 @@ namespace Cesium
     void LoggerSink::sink_it_([[maybe_unused]] const spdlog::details::log_msg& msg)
     {
 #ifdef AZ_ENABLE_TRACING
+        std::string formattedMsg = FormatMessage(msg);
         switch (msg.level)
         {
         case SPDLOG_LEVEL_TRACE:
-            AZ_TracePrintf("Cesium", FormatMessage(msg).c_str());
+            AZ_TracePrintf("Cesium", "%s", formattedMsg.c_str());
             break;
         case SPDLOG_LEVEL_DEBUG:
-            AZ_TracePrintf("Cesium", FormatMessage(msg).c_str());
+            AZ_TracePrintf("Cesium", "%s", formattedMsg.c_str());
             break;
         case SPDLOG_LEVEL_INFO:
-            AZ_TracePrintf("Cesium", FormatMessage(msg).c_str());
+            AZ_TracePrintf("Cesium", "%s", formattedMsg.c_str());
             break;
         case SPDLOG_LEVEL_WARN:
-            AZ_Warning("Cesium", false, FormatMessage(msg).c_str());
+            AZ_Warning("Cesium", false, "%s", formattedMsg.c_str());
             break;
         case SPDLOG_LEVEL_ERROR:
-            AZ_Error("Cesium", false, FormatMessage(msg).c_str());
+            AZ_Error("Cesium", false, "%s", formattedMsg.c_str());
             break;
         case SPDLOG_LEVEL_CRITICAL:
-            AZ_Error("Cesium", false, FormatMessage(msg).c_str());
+            AZ_Error("Cesium", false, "%s", formattedMsg.c_str());
             break;
         default:
-            AZ_TracePrintf("Cesium", FormatMessage(msg).c_str());
+            AZ_TracePrintf("Cesium", "%s", formattedMsg.c_str());
         }
 #endif // AZ_ENABLE_TRACING
     }

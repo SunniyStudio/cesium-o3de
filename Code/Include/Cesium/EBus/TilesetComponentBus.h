@@ -108,11 +108,11 @@ namespace Cesium
         {
         }
 
-        bool IsLocalFile();
+        bool IsLocalFile() const;
 
-        bool IsUrl();
+        bool IsUrl() const;
 
-        bool IsCesiumIon();
+        bool IsCesiumIon() const;
 
         void SetLocalFile(const TilesetLocalFileSource& source);
 

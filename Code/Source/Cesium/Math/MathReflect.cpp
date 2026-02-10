@@ -573,7 +573,6 @@ namespace Cesium
                 {
                     return AZ::Vector4(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z), static_cast<float>(v.w));
                 });
-        ;
     }
 
     template<typename MatType>

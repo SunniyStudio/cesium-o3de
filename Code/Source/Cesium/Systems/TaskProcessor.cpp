@@ -27,7 +27,7 @@ namespace Cesium
 
     void TaskProcessor::startTask(std::function<void()> task)
     {
-        AZ::Job* job = aznew AZ::JobFunction<std::function<void()>>(task, true, m_jobContext.get());
+        AZ::Job* job = aznew AZ::JobFunction<std::function<void()>>(std::move(task), true, m_jobContext.get());
         job->Start();
     }
 } // namespace Cesium

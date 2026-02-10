@@ -79,9 +79,9 @@ namespace Cesium
             else
             {
                 std::size_t vertexIndex = static_cast<std::size_t>(face * 3 + vert);
-                const glm::vec2& uv = uvs[vertexIndex];
-                texOut[0] = static_cast<float>(uv.x) / 256.0f;
-                texOut[1] = static_cast<float>(uv.y) / 256.0f;
+                const glm::u8vec2& uv = uvs[vertexIndex];
+                texOut[0] = static_cast<float>(uv.x) / 255.0f;
+                texOut[1] = static_cast<float>(uv.y) / 255.0f;
             }
         }
 
@@ -97,9 +97,9 @@ namespace Cesium
             else
             {
                 std::size_t vertexIndex = static_cast<std::size_t>(face * 3 + vert);
-                const glm::vec2& uv = uvs[vertexIndex];
-                texOut[0] = static_cast<float>(uv.x) / 65536.0f;
-                texOut[1] = static_cast<float>(uv.y) / 65536.0f;
+                const glm::u16vec2& uv = uvs[vertexIndex];
+                texOut[0] = static_cast<float>(uv.x) / 65535.0f;
+                texOut[1] = static_cast<float>(uv.y) / 65535.0f;
             }
         }
 
@@ -154,7 +154,7 @@ namespace Cesium
         SMikkTSpaceContext mikkContext;
         mikkContext.m_pInterface = &mikkInterface;
         mikkContext.m_pUserData = &customData;
-        return (genTangSpaceDefault(&mikkContext) == 0);
+        return (genTangSpaceDefault(&mikkContext) != 0);
     }
 
     bool BitangentAndTangentGenerator::Generate(
@@ -188,7 +188,7 @@ namespace Cesium
         SMikkTSpaceContext mikkContext;
         mikkContext.m_pInterface = &mikkInterface;
         mikkContext.m_pUserData = &customData;
-        return (genTangSpaceDefault(&mikkContext) == 0);
+        return (genTangSpaceDefault(&mikkContext) != 0);
     }
 
     bool BitangentAndTangentGenerator::Generate(
@@ -222,6 +222,6 @@ namespace Cesium
         SMikkTSpaceContext mikkContext;
         mikkContext.m_pInterface = &mikkInterface;
         mikkContext.m_pUserData = &customData;
-        return (genTangSpaceDefault(&mikkContext) == 0);
+        return (genTangSpaceDefault(&mikkContext) != 0);
     }
 } // namespace Cesium

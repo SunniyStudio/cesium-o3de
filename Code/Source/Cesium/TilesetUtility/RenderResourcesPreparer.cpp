@@ -231,7 +231,9 @@ namespace Cesium
         void* pLoadThreadResult,
         void* pMainThreadResult) noexcept
     {
-        if (pLoadThreadResult)
+        // After prepareRasterInMainThread, pLoadThreadResult and pMainThreadResult may
+        // point to the same object. Guard against double-free.
+        if (pLoadThreadResult && pLoadThreadResult != pMainThreadResult)
         {
             RasterOverlay* rasterOverlay = reinterpret_cast<RasterOverlay*>(pLoadThreadResult);
             delete rasterOverlay;

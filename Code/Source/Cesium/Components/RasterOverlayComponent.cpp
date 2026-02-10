@@ -134,6 +134,10 @@ namespace Cesium
         }
 
         auto rasterOverlay = LoadRasterOverlayImpl();
+        if (!rasterOverlay)
+        {
+            return;
+        }
         m_impl->m_rasterOverlayObserverPtr = rasterOverlay.get();
 
         bool success = false;

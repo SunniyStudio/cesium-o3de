@@ -195,8 +195,9 @@ namespace Cesium
                     ++end;
                 }
 
-                typename MatType::length_type col = i / instance.length();
-                typename MatType::length_type row = i % instance[0].length();
+                typename MatType::length_type numRows = instance[0].length();
+                typename MatType::length_type col = i / numRows;
+                typename MatType::length_type row = i % numRows;
                 instance[col][row] = std::atof(&text[begin]);
                 begin = end + 1;
                 end = begin;

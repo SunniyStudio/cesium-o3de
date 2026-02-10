@@ -44,6 +44,12 @@ namespace Cesium
             auto awsHttpRequest = Aws::Http::CreateHttpRequest(
                 awsURI, m_httpRequestParameter.m_method, Aws::Utils::Stream::DefaultResponseStreamFactoryMethod);
 
+            if (!awsHttpRequest)
+            {
+                m_promise.resolve({ nullptr, nullptr });
+                return;
+            }
+
             for (const auto& it : m_httpRequestParameter.m_headers)
             {
                 awsHttpRequest->SetHeaderValue(it.first.c_str(), it.second.c_str());
@@ -169,10 +175,6 @@ namespace Cesium
     {
         std::string absoluteUrl = CesiumUtility::Uri::resolve(request.m_parentPath.c_str(), request.m_path.c_str());
 
-        Aws::Client::ClientConfiguration config;
-        config.enableTcpKeepAlive = AZ_TRAIT_AZFRAMEWORK_AWS_ENABLE_TCP_KEEP_ALIVE_SUPPORTED;
-        std::shared_ptr<Aws::Http::HttpClient> awsHttpClient = Aws::Http::CreateHttpClient(config);
-
         Aws::Http::URI awsURI(absoluteUrl.c_str());
         auto awsHttpRequest =
             Aws::Http::CreateHttpRequest(awsURI, Aws::Http::HttpMethod::HTTP_GET, Aws::Utils::Stream::DefaultResponseStreamFactoryMethod);
@@ -181,7 +183,7 @@ namespace Cesium
         {
             return {};
         }
-        auto awsHttpResponse = awsHttpClient->MakeRequest(awsHttpRequest);
+        auto awsHttpResponse = m_awsHttpClient->MakeRequest(awsHttpRequest);
         if (!awsHttpResponse)
         {
             return {};
@@ -221,7 +223,7 @@ namespace Cesium
     {
         auto& ioStream = response.GetResponseBody();
         std::size_t readSoFar = 0;
-        const std::size_t maxRead = 256;
+        const std::size_t maxRead = 32768;
         IOContent content;
         while (ioStream)
         {

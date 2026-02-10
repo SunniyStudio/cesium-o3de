@@ -137,21 +137,20 @@ namespace Cesium
                 ->Method("GetLocalFile", &TilesetSource::GetLocalFile)
                 ->Method("GetUrl", &TilesetSource::GetUrl)
                 ->Method("GetCesiumIon", &TilesetSource::GetCesiumIon);
-            ;
         }
     }
 
-    bool Cesium::TilesetSource::IsLocalFile()
+    bool Cesium::TilesetSource::IsLocalFile() const
     {
         return m_type == TilesetSourceType::LocalFile;
     }
 
-    bool Cesium::TilesetSource::IsUrl()
+    bool Cesium::TilesetSource::IsUrl() const
     {
         return m_type == TilesetSourceType::Url;
     }
 
-    bool Cesium::TilesetSource::IsCesiumIon()
+    bool Cesium::TilesetSource::IsCesiumIon() const
     {
         return m_type == TilesetSourceType::CesiumIon;
     }

@@ -64,10 +64,20 @@ namespace Cesium
         {
             AZStd::string_view urlView = url;
             auto separator = urlView.find_first_of(",");
+            if (separator == AZStd::string_view::npos)
+            {
+                AZ_Warning("Cesium", false, "Malformed data URI: missing comma separator");
+                return;
+            }
             auto base64View = url.substr(separator + 1);
 
             AZStd::vector<AZ::u8> decodeOutput;
             AZ::StringFunc::Base64::Decode(decodeOutput, base64View.data(), base64View.size());
+            if (decodeOutput.empty())
+            {
+                AZ_Warning("Cesium", false, "Base64 decode returned empty result");
+                return;
+            }
 
             CesiumGltfReader::GltfReader gltfReader;
             auto imageResult = gltfReader.readImage(

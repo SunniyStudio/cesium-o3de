@@ -50,7 +50,7 @@ namespace Cesium
             m_isStop = true;
         }
 
-        double t = m_totalTimePassed / m_totalDuration;
+        double t = m_totalDuration > 0.0 ? m_totalTimePassed / m_totalDuration : 1.0;
 
         // interpolate current ecef position
         m_current = glm::lerp(m_begin, m_destination, t);

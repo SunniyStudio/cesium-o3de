@@ -99,17 +99,20 @@ namespace Cesium
 
         Cesium3DTilesSelection::TilesetExternals CreateTilesetExternal(IOKind kind)
         {
+            auto* cesiumInterface = CesiumInterface::Get();
+            AZ_Assert(cesiumInterface, "CesiumInterface is not available");
+
             // create render resources preparer if not exist
             AZ::Render::MeshFeatureProcessorInterface* meshFeatureProcessor =
                 AZ::RPI::Scene::GetFeatureProcessorForEntity<AZ::Render::MeshFeatureProcessorInterface>(m_selfEntity);
             m_renderResourcesPreparer = std::make_shared<RenderResourcesPreparer>(meshFeatureProcessor);
 
             return Cesium3DTilesSelection::TilesetExternals{
-                CesiumInterface::Get()->GetAssetAccessor(kind),
+                cesiumInterface->GetAssetAccessor(kind),
                 m_renderResourcesPreparer,
-                CesiumAsync::AsyncSystem(CesiumInterface::Get()->GetTaskProcessor()),
-                CesiumInterface::Get()->GetCreditSystem(),
-                CesiumInterface::Get()->GetLogger(),
+                CesiumAsync::AsyncSystem(cesiumInterface->GetTaskProcessor()),
+                cesiumInterface->GetCreditSystem(),
+                cesiumInterface->GetLogger(),
             };
         }
 

@@ -8,8 +8,12 @@ namespace Cesium
 {
     GltfRasterMaterialBuilder::GltfRasterMaterialBuilder()
     {
-        const auto& defaultMaterialType = CesiumInterface::Get()->GetCriticalAssetManager().m_rasterMaterialType;
-        m_pbrMaterialBuilder.OverrideMaterialType(defaultMaterialType);
+        auto* cesiumInterface = CesiumInterface::Get();
+        if (cesiumInterface)
+        {
+            const auto& defaultMaterialType = cesiumInterface->GetCriticalAssetManager().m_rasterMaterialType;
+            m_pbrMaterialBuilder.OverrideMaterialType(defaultMaterialType);
+        }
     }
 
     const AZ::Data::Asset<AZ::RPI::MaterialTypeAsset>& GltfRasterMaterialBuilder::GetDefaultMaterialType() const
@@ -73,15 +77,32 @@ namespace Cesium
         AZStd::string prefix = AZStd::string::format("raster%d", rasterLayer);
 
         auto rasterMapIndex = material->FindPropertyIndex(AZ::Name(prefix + ".textureMap"));
+        if (!rasterMapIndex.IsValid())
+        {
+            AZ_Warning("Cesium", false, "Failed to find raster property: %s.textureMap", prefix.c_str());
+            return false;
+        }
         material->SetPropertyValue(rasterMapIndex, raster);
 
         auto useRasterMapIndex = material->FindPropertyIndex(AZ::Name(prefix + ".useTexture"));
+        if (!useRasterMapIndex.IsValid())
+        {
+            return false;
+        }
         material->SetPropertyValue(useRasterMapIndex, true);
 
         auto textureMapUvIndex = material->FindPropertyIndex(AZ::Name(prefix + ".textureMapUv"));
+        if (!textureMapUvIndex.IsValid())
+        {
+            return false;
+        }
         material->SetPropertyValue(textureMapUvIndex, textureUv);
 
         auto uvTranslateScaleIndex = material->FindPropertyIndex(AZ::Name(prefix + ".uvTranslateScale"));
+        if (!uvTranslateScaleIndex.IsValid())
+        {
+            return false;
+        }
         material->SetPropertyValue(uvTranslateScaleIndex, uvTranslateScale);
 
         return material->Compile();
@@ -92,16 +113,28 @@ namespace Cesium
         AZStd::string prefix = AZStd::string::format("raster%d", rasterLayer);
 
         auto rasterMapIndex = material->FindPropertyIndex(AZ::Name(prefix + ".textureMap"));
-        material->SetPropertyValue(rasterMapIndex, AZ::RPI::MaterialPropertyValue(AZ::Data::Asset<AZ::RPI::ImageAsset>()));
+        if (rasterMapIndex.IsValid())
+        {
+            material->SetPropertyValue(rasterMapIndex, AZ::RPI::MaterialPropertyValue(AZ::Data::Asset<AZ::RPI::ImageAsset>()));
+        }
 
         auto useRasterMapIndex = material->FindPropertyIndex(AZ::Name(prefix + ".useTexture"));
-        material->SetPropertyValue(useRasterMapIndex, false);
+        if (useRasterMapIndex.IsValid())
+        {
+            material->SetPropertyValue(useRasterMapIndex, false);
+        }
 
         auto textureMapUvIndex = material->FindPropertyIndex(AZ::Name(prefix + ".textureMapUv"));
-        material->SetPropertyValue(textureMapUvIndex, static_cast<std::uint32_t>(0));
+        if (textureMapUvIndex.IsValid())
+        {
+            material->SetPropertyValue(textureMapUvIndex, static_cast<std::uint32_t>(0));
+        }
 
         auto uvTranslateScaleIndex = material->FindPropertyIndex(AZ::Name(prefix + ".uvTranslateScale"));
-        material->SetPropertyValue(uvTranslateScaleIndex, AZ::Vector4(0.0, 0.0, 1.0, 1.0));
+        if (uvTranslateScaleIndex.IsValid())
+        {
+            material->SetPropertyValue(uvTranslateScaleIndex, AZ::Vector4(0.0, 0.0, 1.0, 1.0));
+        }
 
         return material->Compile();
     }

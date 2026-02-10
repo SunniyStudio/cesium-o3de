@@ -44,9 +44,20 @@ namespace Cesium
         GltfModelBuilder builder(AZStd::make_unique<GltfPBRMaterialBuilder>());
         GltfModelBuilderOption option{ glm::dmat4(1.0) };
         GltfLoadModel loadModel;
-        builder.Create(CesiumInterface::Get()->GetIOManager(IOKind::LocalFile), filePath, option, loadModel);
+        auto* cesiumInterface = CesiumInterface::Get();
+        if (!cesiumInterface)
+        {
+            AZ_Error("Cesium", false, "CesiumInterface is not available");
+            return;
+        }
+        builder.Create(cesiumInterface->GetIOManager(IOKind::LocalFile), filePath, option, loadModel);
         AZ::Render::MeshFeatureProcessorInterface* meshFeatureProcessor =
             AZ::RPI::Scene::GetFeatureProcessorForEntity<AZ::Render::MeshFeatureProcessorInterface>(GetEntityId());
+        if (!meshFeatureProcessor)
+        {
+            AZ_Error("Cesium", false, "MeshFeatureProcessor is not available for this entity");
+            return;
+        }
         m_impl->m_gltfModel = AZStd::make_unique<GltfModel>(meshFeatureProcessor, loadModel);
 
         // Set the model transform

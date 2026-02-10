@@ -22,10 +22,8 @@ namespace Cesium
         // initialize credit system
         m_creditSystem = std::make_shared<Cesium3DTilesSelection::CreditSystem>();
 
-        // initialize logger
-        m_logger = spdlog::default_logger();
-        m_logger->sinks().clear();
-        m_logger->sinks().push_back(std::make_shared<LoggerSink>());
+        // initialize logger with a dedicated logger instance (not the global default)
+        m_logger = std::make_shared<spdlog::logger>("cesium", std::make_shared<LoggerSink>());
     }
 
     GenericIOManager& CesiumSystem::GetIOManager(IOKind kind)

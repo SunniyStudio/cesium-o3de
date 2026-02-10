@@ -28,7 +28,6 @@ namespace Cesium
                 ->Property("North", BehaviorValueProperty(&BoundingRegion::m_north))
                 ->Property("MinHeight", BehaviorValueProperty(&BoundingRegion::m_minHeight))
                 ->Property("MaxHeight", BehaviorValueProperty(&BoundingRegion::m_maxHeight));
-            ;
         }
     }
 

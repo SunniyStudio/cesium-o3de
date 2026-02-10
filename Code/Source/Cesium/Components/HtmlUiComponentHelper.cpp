@@ -53,6 +53,10 @@ namespace Cesium
         int err;
 
         tdoc = tidyCreate();
+        if (!tdoc)
+        {
+            return canvasEntityId;
+        }
         tidyOptSetBool(tdoc, TidyForceOutput, yes); /* try harder */
         tidyOptSetInt(tdoc, TidyWrapLen, 4096);
         tidySetErrorBuffer(tdoc, &tidy_errbuf);
@@ -218,7 +222,6 @@ namespace Cesium
 
             if (!text.empty())
             {
-                UiTransformInterface::RectPointsArray textBounding;
                 UiTextBus::EventResult(height, textEntityId, &UiTextBus::Events::GetTextHeight);
             }
 

@@ -2,7 +2,6 @@
 
 #include <AzCore/Component/EntityId.h>
 #include <AzCore/std/string/string.h>
-#include <AzCore/std/containers/stack.h>
 #include <tidy.h>
 
 namespace Cesium

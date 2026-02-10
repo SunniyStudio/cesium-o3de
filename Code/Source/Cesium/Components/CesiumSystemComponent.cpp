@@ -88,6 +88,10 @@ namespace Cesium
 
     CesiumSystemComponent::~CesiumSystemComponent()
     {
+        if (CesiumInterface::Get() == m_cesiumSystem.get())
+        {
+            CesiumInterface::Unregister(m_cesiumSystem.get());
+        }
     }
 
     void CesiumSystemComponent::Init()

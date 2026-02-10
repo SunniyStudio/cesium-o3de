@@ -23,7 +23,6 @@ namespace Cesium
         , m_meshFeatureProcessor{ meshFeatureProcessor }
         , m_meshes{}
     {
-        AZStd::unordered_map<TextureId, AZ::Data::Instance<AZ::RPI::Image>> textures;
         m_materials.resize(loadModel.m_materials.size());
         m_meshes.reserve(loadModel.m_meshes.size());
         for (const auto& loadMesh : loadModel.m_meshes)
@@ -38,7 +37,9 @@ namespace Cesium
             for (std::size_t i = 0; i < loadMesh.m_primitives.size(); ++i)
             {
                 const GltfLoadPrimitive& loadPrimitive = loadMesh.m_primitives[i];
-                if (!m_materials.empty() && loadPrimitive.m_materialId >= 0 && !m_materials[loadPrimitive.m_materialId].m_material)
+                if (!m_materials.empty() && loadPrimitive.m_materialId >= 0
+                    && static_cast<std::size_t>(loadPrimitive.m_materialId) < m_materials.size()
+                    && !m_materials[loadPrimitive.m_materialId].m_material)
                 {
                     // Create material instance
                     const GltfLoadMaterial& loadMaterial = loadModel.m_materials[loadPrimitive.m_materialId];
@@ -117,7 +118,8 @@ namespace Cesium
 
     void GltfModel::UpdateMaterialForPrimitive(GltfPrimitive& primitive)
     {
-        if (primitive.m_materialIndex >= 0)
+        if (primitive.m_materialIndex >= 0
+            && static_cast<std::size_t>(primitive.m_materialIndex) < m_materials.size())
         {
             m_meshFeatureProcessor->SetCustomMaterials(primitive.m_meshHandle, m_materials[primitive.m_materialIndex].m_material);
         }
@@ -163,7 +165,7 @@ namespace Cesium
 
     void GltfModel::Destroy() noexcept
     {
-        if (m_meshes.empty())
+        if (m_meshes.empty() || !m_meshFeatureProcessor)
         {
             return;
         }

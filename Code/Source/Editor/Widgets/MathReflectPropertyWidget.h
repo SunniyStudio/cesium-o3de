@@ -138,7 +138,7 @@ namespace Cesium
 
         QWidget* CreateGUI(QWidget* parent) override
         {
-            auto newCtrl = new MatrixInputWidget(parent, m_numOfCols, m_numOfCols);
+            auto newCtrl = new MatrixInputWidget(parent, m_numOfCols, m_numOfRows);
             QObject::connect(
                 newCtrl, &MatrixInputWidget::valueChanged, newCtrl,
                 [newCtrl]()
@@ -217,7 +217,7 @@ namespace Cesium
 
         AZ::u32 GetHandlerName(void) const override
         {
-            return AZ_CRC("CesiumDoubleVector4");
+            return AZ_CRC("CesiumDoubleVector2");
         }
     };
 

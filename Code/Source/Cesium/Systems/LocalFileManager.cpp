@@ -48,7 +48,8 @@ namespace Cesium
                 // Create a buffer.
                 std::size_t fileSize = stream.GetLength();
                 IOContent content(fileSize);
-                stream.Read(fileSize, content.data());
+                auto bytesRead = stream.Read(fileSize, content.data());
+                content.resize(static_cast<std::size_t>(bytesRead));
                 m_promise.resolve(std::move(content));
             }
         }
@@ -100,7 +101,8 @@ namespace Cesium
         // Create a buffer.
         std::size_t fileSize = stream.GetLength();
         IOContent content(fileSize);
-        stream.Read(fileSize, content.data());
+        auto bytesRead = stream.Read(fileSize, content.data());
+        content.resize(static_cast<std::size_t>(bytesRead));
         return content;
     }
 

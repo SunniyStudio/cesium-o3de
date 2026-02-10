@@ -163,7 +163,7 @@ namespace Cesium
             ProcessMidFlyState(deltaTime);
             break;
         case CameraFlyState::NoFly:
-            ProcessNoFlyState();
+            ProcessNoFlyState(deltaTime);
             break;
         default:
             break;
@@ -214,7 +214,7 @@ namespace Cesium
         }
     }
 
-    void GeoReferenceCameraFlyController::ProcessNoFlyState()
+    void GeoReferenceCameraFlyController::ProcessNoFlyState(float deltaTime)
     {
         if (m_cameraRotateUpdate || m_cameraMoveUpdate)
         {
@@ -236,8 +236,8 @@ namespace Cesium
                 static_cast<float>(totalRotationQuat.x), static_cast<float>(totalRotationQuat.y), static_cast<float>(totalRotationQuat.z),
                 static_cast<float>(totalRotationQuat.w)));
 
-            // calculate camera position
-            glm::dvec3 move = totalRotation * glm::dvec4(m_cameraMovement, 0.0);
+            // calculate camera position (multiply by deltaTime to make movement frame-rate independent)
+            glm::dvec3 move = totalRotation * glm::dvec4(m_cameraMovement * static_cast<double>(deltaTime), 0.0);
             glm::dvec3 newPosition = MathHelper::ToDVec3(relativeCameraTransform.GetTranslation()) + move;
 
             // reset camera pitch and head
@@ -318,7 +318,7 @@ namespace Cesium
 
     void GeoReferenceCameraFlyController::OnKeyEvent(const AzFramework::InputChannel& inputChannel)
     {
-        // process mouse inputs
+        // process keyboard inputs
         AzFramework::InputChannel::State state = inputChannel.GetState();
         const AzFramework::InputChannelId& inputChannelId = inputChannel.GetInputChannelId();
         if (state == AzFramework::InputChannel::State::Began || state == AzFramework::InputChannel::State::Updated)

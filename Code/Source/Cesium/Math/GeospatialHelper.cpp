@@ -15,6 +15,10 @@ namespace Cesium
             auto ECEFCartesianToCartographic = [](const glm::dvec3& ecefPosition)
             {
                 auto cartographic = CesiumGeospatial::Ellipsoid::WGS84.cartesianToCartographic(ecefPosition);
+                if (!cartographic)
+                {
+                    return Cartographic{};
+                }
                 return Cartographic(cartographic->longitude, cartographic->latitude, cartographic->height);
             };
 

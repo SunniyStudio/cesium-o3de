@@ -24,6 +24,10 @@ namespace Cesium
             .thenImmediately(
                 [](HttpResult&& result) -> std::shared_ptr<CesiumAsync::IAssetRequest>
                 {
+                    if (!result.m_request)
+                    {
+                        return nullptr;
+                    }
                     return HttpAssetAccessor::CreateO3DEAssetRequest(*result.m_request, result.m_response.get());
                 });
     }
@@ -36,13 +40,21 @@ namespace Cesium
     {
         CesiumAsync::HttpHeaders requestHeaders = ConvertToCesiumHeaders(headers);
         requestHeaders[USER_AGENT_HEADER_KEY] = m_userAgentHeaderValue;
-        AZStd::string requestBody(reinterpret_cast<const char*>(contentPayload.data()), contentPayload.size());
+            AZStd::string requestBody;
+        if (!contentPayload.empty())
+        {
+            requestBody.assign(reinterpret_cast<const char*>(contentPayload.data()), contentPayload.size());
+        }
         HttpRequestParameter parameter(
             AZStd ::string(url.c_str()), Aws::Http::HttpMethod::HTTP_POST, std::move(requestHeaders), std::move(requestBody));
         return m_httpManager->AddRequest(asyncSystem, std::move(parameter))
             .thenImmediately(
                 [](HttpResult&& result) -> std::shared_ptr<CesiumAsync::IAssetRequest>
                 {
+                    if (!result.m_request)
+                    {
+                        return nullptr;
+                    }
                     return HttpAssetAccessor::CreateO3DEAssetRequest(*result.m_request, result.m_response.get());
                 });
     }

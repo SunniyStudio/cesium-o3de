@@ -61,6 +61,19 @@ namespace Cesium
     {
         AzFramework::InputChannelEventListener::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
+
+        if (m_creditCanvasEntityId.IsValid())
+        {
+            UiCanvasManagerBus::Broadcast(&UiCanvasManagerBus::Events::UnloadCanvas, m_creditCanvasEntityId);
+            m_creditCanvasEntityId = AZ::EntityId{};
+        }
+        if (m_clickableCanvasEntityId.IsValid())
+        {
+            UiCanvasManagerBus::Broadcast(&UiCanvasManagerBus::Events::UnloadCanvas, m_clickableCanvasEntityId);
+            m_clickableCanvasEntityId = AZ::EntityId{};
+        }
+
+        UiCursorBus::Broadcast(&UiCursorBus::Events::DecrementVisibleCounter);
     }
 
     void TilesetCreditComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
@@ -70,7 +83,12 @@ namespace Cesium
             return;
         }
 
-        const auto& creditSystem = CesiumInterface::Get()->GetCreditSystem();
+        auto* cesiumInterface = CesiumInterface::Get();
+        if (!cesiumInterface)
+        {
+            return;
+        }
+        const auto& creditSystem = cesiumInterface->GetCreditSystem();
 
         const auto& creditToShow = creditSystem->getCreditsToShowThisFrame();
         bool creditUpdated = (creditToShow.size() != m_lastCreditCount);

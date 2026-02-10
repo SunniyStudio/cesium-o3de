@@ -1,6 +1,7 @@
 #include <Cesium/Components/OriginShiftComponent.h>
 #include <Cesium/Math/MathReflect.h>
 #include <AzCore/Serialization/SerializeContext.h>
+#include <glm/gtc/matrix_inverse.hpp>
 
 namespace Cesium
 {
@@ -82,7 +83,7 @@ namespace Cesium
     void OriginShiftComponent::UpdateTransform()
     {
         m_absToRelWorld = glm::translate(glm::dmat4(m_rotation), -m_origin);
-        m_relToAbsWorld = glm::inverse(m_absToRelWorld);
+        m_relToAbsWorld = glm::affineInverse(m_absToRelWorld);
         OriginShiftNotificationBus::Broadcast(&OriginShiftNotificationBus::Events::OnOriginShifting, m_absToRelWorld);
     }
 } // namespace Cesium

@@ -36,7 +36,7 @@ namespace Cesium
     AZ::SettingsRegistryInterface::FixedValueString PlatformInfo::GetProjectName()
     {
         AZ::SettingsRegistryInterface::FixedValueString projectName = AZ::Utils::GetProjectName();
-        if (projectName != "")
+        if (!projectName.empty())
         {
             return projectName;
         }
