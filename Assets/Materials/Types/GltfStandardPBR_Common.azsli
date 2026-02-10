@@ -9,10 +9,14 @@
 #pragma once 
 
 #include <Atom/Features/SrgSemantics.azsli>
-#include <viewsrg.srgi>
+#include <viewsrg_all.srgi>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/LightingOptions.azsli>
 #include <Atom/Features/PBR/AlphaUtils.azsli>
+
+// MaterialParameters struct required by O3DE 25.10 ParallaxMapping.azsli and other engine headers.
+// For custom shaders not using the material pipeline, we define a minimal empty struct.
+struct MaterialParameters {};
 
 #include "./MaterialInputs/RasterOverlayInput.azsli"
 #include "./MaterialInputs/BaseColorInput.azsli"
@@ -77,10 +81,10 @@ ShaderResourceGroup MaterialSrg : SRG_PerMaterial
     };
 }
 
-// Callback function for ParallaxMapping.azsli
-DepthResult GetDepth(float2 uv, float2 uv_ddx, float2 uv_ddy)
+// Callback function for ParallaxMapping.azsli (O3DE 25.10 signature with MaterialParameters)
+DepthResult GetDepth(const MaterialParameters params, Texture2D heightmap, sampler mapSampler, float2 uv, float2 uv_ddx, float2 uv_ddy)
 {
-    return SampleDepthFromHeightmap(MaterialSrg::m_heightmap, MaterialSrg::m_sampler, uv, uv_ddx, uv_ddy);
+    return SampleDepthFromHeightmap(heightmap, mapSampler, uv, uv_ddx, uv_ddy);
 }
 
 COMMON_OPTIONS_PARALLAX()

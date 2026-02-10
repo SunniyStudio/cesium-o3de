@@ -161,17 +161,6 @@
                         "type": "ShaderOption",
                         "name": "o_enableIBL"
                     }
-                },
-                {
-                    "name": "forwardPassIBLSpecular",
-                    "displayName": "Forward Pass IBL Specular",
-                    "description": "Whether to apply IBL specular in the forward pass.",
-                    "type": "Bool",
-                    "defaultValue": false,
-                    "connection": {
-                        "type": "ShaderOption",
-                        "name": "o_materialUseForwardPassIBLSpecular"
-                    }
                 }
             ],
             "raster0": [
@@ -1170,26 +1159,18 @@
         {
             "file": "./GltfStandardPBR_DepthPass_WithPS.shader",
             "tag": "DepthPass_WithPS"
-        },
-        {
-            "file": "Shaders/MotionVector/MeshMotionVector.shader",
-            "tag": "MeshMotionVector"
-        },
-        // Used by the light culling system to produce accurate depth bounds for this object when it uses blended transparency
-        {
-            "file": "Shaders/Depth/DepthPassTransparentMin.shader",
-            "tag": "DepthPassTransparentMin"
-        },
-        {
-            "file": "Shaders/Depth/DepthPassTransparentMax.shader",
-            "tag": "DepthPassTransparentMax"
-        }        
+        }
+        // MeshMotionVector.shader, DepthPassTransparentMin/Max.shader removed in O3DE 25.10
     ],
     "functors": [
         {
             // Maps 2D scale, offset, and rotate properties into a float3x3 transform matrix.
             "type": "Transform2D",
             "args": {
+                "shaderParameters": [
+                    { "name": "m_uvMatrix", "type": "float3x3" },
+                    { "name": "m_uvMatrixInverse", "type": "float3x3" }
+                ],
                 "transformOrder": [ "Rotate", "Translate", "Scale" ],
                 "centerProperty": "uv.center",
                 "scaleProperty": "uv.scale",
@@ -1206,6 +1187,9 @@
             // Convert emissive unit.
             "type": "ConvertEmissiveUnit",
             "args": {
+                "shaderParameters": [
+                    { "name": "m_emissiveIntensity", "type": "float" }
+                ],
                 "intensityProperty": "emissive.intensity",
                 "lightUnitProperty": "emissive.unit",
                 "shaderInput": "m_emissiveIntensity",

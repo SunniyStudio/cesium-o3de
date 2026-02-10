@@ -12,10 +12,11 @@
 
 // SRGs
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
-#include <Atom/Features/PBR/ForwardPassSrg.azsli>
+#include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
 
 // Pass Output
-#include <Atom/Features/PBR/ForwardPassOutput.azsli>
+#define OUTPUT_DEPTH 1
+#include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
 
 // Utility
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
@@ -26,6 +27,12 @@
 
 // Decals
 #include <Atom/Features/PBR/Decals.azsli>
+
+// IBL (no longer included via Lights.azsli in O3DE 25.10)
+#include <Atom/Features/PBR/Lights/Ibl.azsli>
+
+// Instanced Transforms (replaces old VertexHelper)
+#include <Atom/Features/InstancedTransforms.azsli>
 
 
 // ---------- Material Parameters ----------
@@ -55,7 +62,7 @@ struct VSInput
     float3 m_position : POSITION;
     float3 m_normal : NORMAL;
     float4 m_tangent : TANGENT; 
-    float3 m_bitangent : BITANGENT; 
+    float3 m_bitangent : BITANGENT; // Note: bitangent is now derived from tangent.w in ConstructTBN, but still needed as vertex attribute for mesh compatibility
  
     // Extended fields (only referenced in this azsl file)...
     float2 m_uv0 : UV0;
@@ -73,20 +80,21 @@ struct VSOutput
     float3 m_tangent : TANGENT; 
     float3 m_bitangent : BITANGENT; 
     float3 m_worldPosition : UV0;
-    float3 m_shadowCoords[ViewSrg::MaxCascadeCount] : UV3;
 
     // Extended fields (only referenced in this azsl file)...
     float2 m_uv[UvSetCount] : UV1;
-    float2 m_rasterUv[RasterUvSetCount] : UV7;
+    float2 m_rasterUv[RasterUvSetCount] : UV3;
 };
 
-#include <Atom/Features/Vertex/VertexHelper.azsli>
-
-VSOutput StandardPbr_ForwardPassVS(VSInput IN)
+VSOutput StandardPbr_ForwardPassVS(VSInput IN, uint instanceId : SV_InstanceID)
 {
     VSOutput OUT;
 
-    float3 worldPosition = mul(ObjectSrg::GetWorldMatrix(), float4(IN.m_position, 1.0)).xyz;
+    float4x4 objectToWorld = GetObjectToWorldMatrix(instanceId);
+    float3 worldPosition = mul(objectToWorld, float4(IN.m_position, 1.0)).xyz;
+
+    OUT.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(worldPosition, 1.0));
+    OUT.m_worldPosition = worldPosition;
 
     // By design, only UV0 is allowed to apply transforms.
     OUT.m_uv[0] = mul(MaterialSrg::m_uvMatrix, float3(IN.m_uv0, 1.0)).xy;
@@ -102,10 +110,9 @@ VSOutput StandardPbr_ForwardPassVS(VSInput IN)
         OUT.m_rasterUv[MaterialSrg::raster1_m_rasterMapUvIndex] = rasterUv[MaterialSrg::raster1_m_rasterMapUvIndex];
     }
 
-    // Shadow coords will be calculated in the pixel shader in this case
-    bool skipShadowCoords = ShouldHandleParallax() && o_parallax_enablePixelDepthOffset;
-
-    VertexHelper(IN, OUT, worldPosition, skipShadowCoords);
+    // Transform TBN to world space (O3DE 25.10: bitangent derived from tangent.w)
+    float3x3 objectToWorldIT = GetObjectToWorldMatrixInverseTranspose(instanceId);
+    ConstructTBN(IN.m_normal, IN.m_tangent, objectToWorld, objectToWorldIT, OUT.m_normal, OUT.m_tangent, OUT.m_bitangent);
 
     return OUT;
 }
@@ -149,22 +156,12 @@ PbrLightingOutput ForwardPassPS_Common(VSOutput IN, bool isFrontFace, out float 
 
     if(ShouldHandleParallax())
     {
-
         float3x3 uvMatrix = MaterialSrg::m_parallaxUvIndex == 0 ? MaterialSrg::m_uvMatrix : CreateIdentity3x3();
         float3x3 uvMatrixInverse = MaterialSrg::m_parallaxUvIndex == 0 ? MaterialSrg::m_uvMatrixInverse : CreateIdentity3x3();
-        GetParallaxInput(IN.m_normal, tangents[MaterialSrg::m_parallaxUvIndex], bitangents[MaterialSrg::m_parallaxUvIndex], MaterialSrg::m_heightmapScale, MaterialSrg::m_heightmapOffset,
-                         ObjectSrg::GetWorldMatrix(), uvMatrix, uvMatrixInverse,
+        GetParallaxInput(MaterialSrg::m_heightmap, MaterialSrg::m_sampler,
+                         IN.m_normal, tangents[MaterialSrg::m_parallaxUvIndex], bitangents[MaterialSrg::m_parallaxUvIndex], MaterialSrg::m_heightmapScale, MaterialSrg::m_heightmapOffset,
+                         SceneSrg::GetObjectToWorldMatrix(ObjectSrg::m_objectId), uvMatrix, uvMatrixInverse,
                          IN.m_uv[MaterialSrg::m_parallaxUvIndex], IN.m_worldPosition, depthNDC, IN.m_position.w, displacementIsClipped);
-
-        // Adjust directional light shadow coordinates for parallax correction
-        if(o_parallax_enablePixelDepthOffset)
-        {
-            const uint shadowIndex = ViewSrg::m_shadowIndexDirectionalLight;
-            if (o_enableShadows && shadowIndex < SceneSrg::m_directionalLightCount)
-            {
-                DirectionalLightShadow::GetShadowCoords(shadowIndex, IN.m_worldPosition, vertexNormal, IN.m_shadowCoords);
-            }
-        }
     }
 
     Surface surface;
@@ -221,11 +218,11 @@ PbrLightingOutput ForwardPassPS_Common(VSOutput IN, bool isFrontFace, out float 
     LightingData lightingData;
 
     // Light iterator
-    lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
-    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear);
-    
-    // Directional light shadow coordinates
-    lightingData.shadowCoords = IN.m_shadowCoords;
+    LightCullingTileIterator tileIterator;
+    tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
+
+    float3 viewPosition[MAX_SHADING_VIEWS] = { ViewSrg::m_worldPosition };
+    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear, viewPosition);
 
     // ------- Emissive -------
 
@@ -262,13 +259,13 @@ PbrLightingOutput ForwardPassPS_Common(VSOutput IN, bool isFrontFace, out float 
     }
     
     // Diffuse and Specular response (used in IBL calculations)
-    lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.NdotV, surface.specularF0, surface.roughnessLinear);
+    lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.GetSpecularNdotV(), surface.specularF0, surface.roughnessLinear);
     lightingData.diffuseResponse = 1.0 - lightingData.specularResponse;
 
     if(o_clearCoat_feature_enabled)
     {
         // Clear coat layer has fixed IOR = 1.5 and transparent => F0 = (1.5 - 1)^2 / (1.5 + 1)^2 = 0.04
-        lightingData.diffuseResponse *= 1.0 - (FresnelSchlickWithRoughness(lightingData.NdotV, float3(0.04, 0.04, 0.04), surface.clearCoat.roughness) * surface.clearCoat.factor);
+        lightingData.diffuseResponse *= 1.0 - (FresnelSchlickWithRoughness(lightingData.GetSpecularNdotV(), float3(0.04, 0.04, 0.04), surface.clearCoat.roughness) * surface.clearCoat.factor);
     }
 
     // ------- Multiscatter -------
@@ -278,13 +275,13 @@ PbrLightingOutput ForwardPassPS_Common(VSOutput IN, bool isFrontFace, out float 
     // ------- Lighting Calculation -------
 
     // Apply Decals
-    ApplyDecals(lightingData.tileIterator, surface);
+    ApplyDecals(tileIterator, surface);
 
     // Apply Direct Lighting
-    ApplyDirectLighting(surface, lightingData);
+    ApplyDirectLighting(surface, lightingData, IN.m_position, tileIterator);
 
     // Apply Image Based Lighting (IBL)
-    ApplyIBL(surface, lightingData);
+    ApplyIBL(surface, lightingData, o_enableIBL, false /*useSpecularIbl*/, ObjectSrg::m_reflectionProbeData, ObjectSrg::m_reflectionProbeCubeMap);
 
     // Finalize Lighting
     lightingData.FinalizeLighting();
@@ -300,7 +297,7 @@ PbrLightingOutput ForwardPassPS_Common(VSOutput IN, bool isFrontFace, out float 
         // like glass, so it becomes less transparent at grazing angles. For m_opacityAffectsSpecularFactor
         // values close to 1.0, that indicates the absence of a surface entirely, so this effect should
         // not apply.
-        float fresnelAlpha = FresnelSchlickWithRoughness(lightingData.NdotV, alpha, surface.roughnessLinear).x;
+        float fresnelAlpha = FresnelSchlickWithRoughness(lightingData.GetSpecularNdotV(), alpha, surface.roughnessLinear).x;
         alpha = lerp(fresnelAlpha, alpha, MaterialSrg::m_opacityAffectsSpecularFactor);
     }
 
@@ -324,18 +321,6 @@ PbrLightingOutput ForwardPassPS_Common(VSOutput IN, bool isFrontFace, out float 
     }
     else if (o_opacity_mode == OpacityMode::TintedTransparent)
     {
-        // See OpacityMode::Blended above for the basic method. TintedTransparent adds onto the above concept by supporting
-        // colored alpha. This is currently a very basic calculation that uses the baseColor as a multiplier with strength
-        // determined by the alpha. We'll modify this later to be more physically accurate and allow surface depth,
-        // absorption, and interior color to be specified.
-        //
-        // The technique uses dual source blending to allow two separate sources to be part of the blending equation
-        // even though ultimately only a single render target is being written to. m_diffuseColor is render target 0 and
-        // m_specularColor render target 1, and the blend mode is (dest * source1color) + (source * 1.0).
-        //
-        // This means that m_specularColor.rgb (source 1) is multiplied against the destination, then
-        // m_diffuseColor.rgb (source) is added to that, and the final result is stored in render target 0.
-
         lightingOutput.m_diffuseColor.rgb *= lightingOutput.m_diffuseColor.w; // pre-multiply diffuse
 
         // Add specular. m_opacityAffectsSpecularFactor controls how much the alpha masks out specular contribution.
@@ -353,9 +338,9 @@ PbrLightingOutput ForwardPassPS_Common(VSOutput IN, bool isFrontFace, out float 
     return lightingOutput;
 }
 
-ForwardPassOutputWithDepth StandardPbr_ForwardPassPS(VSOutput IN, bool isFrontFace : SV_IsFrontFace)
+ForwardPassOutput StandardPbr_ForwardPassPS(VSOutput IN, bool isFrontFace : SV_IsFrontFace)
 {
-    ForwardPassOutputWithDepth OUT;
+    ForwardPassOutput OUT;
     float depth;
 
     PbrLightingOutput lightingOutput = ForwardPassPS_Common(IN, isFrontFace, depth);
@@ -363,15 +348,14 @@ ForwardPassOutputWithDepth StandardPbr_ForwardPassPS(VSOutput IN, bool isFrontFa
 #ifdef UNIFIED_FORWARD_OUTPUT
     OUT.m_color.rgb = lightingOutput.m_diffuseColor.rgb + lightingOutput.m_specularColor.rgb;
     OUT.m_color.a = lightingOutput.m_diffuseColor.a;
-    OUT.m_depth = depth;
 #else
     OUT.m_diffuseColor = lightingOutput.m_diffuseColor;
     OUT.m_specularColor = lightingOutput.m_specularColor;
     OUT.m_specularF0 = lightingOutput.m_specularF0;
     OUT.m_albedo = lightingOutput.m_albedo;
     OUT.m_normal = lightingOutput.m_normal;
-    OUT.m_depth = depth;
 #endif
+    OUT.m_depth = depth;
     return OUT;
 }
 
@@ -393,5 +377,6 @@ ForwardPassOutput StandardPbr_ForwardPassPS_EDS(VSOutput IN, bool isFrontFace : 
     OUT.m_albedo = lightingOutput.m_albedo;
     OUT.m_normal = lightingOutput.m_normal;
 #endif
+    OUT.m_depth = depth;
     return OUT;
 }

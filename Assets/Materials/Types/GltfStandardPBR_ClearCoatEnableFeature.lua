@@ -23,5 +23,6 @@ end
 function Process(context)
     local enable = context:GetMaterialPropertyValue_bool("clearCoat.enable")
     context:SetShaderOptionValue_bool("o_clearCoat_feature_enabled", enable)
-    context:SetShaderOptionValue_bool("o_materialUseForwardPassIBLSpecular", enable)
+    -- o_materialUseForwardPassIBLSpecular removed in O3DE 25.10
+    -- context:SetShaderOptionValue_bool("o_materialUseForwardPassIBLSpecular", enable)
 end

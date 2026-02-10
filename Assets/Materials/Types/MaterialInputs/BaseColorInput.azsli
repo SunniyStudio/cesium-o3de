@@ -8,10 +8,12 @@
 
 #pragma once
 
+// Delegate to the engine's BaseColorInput for function implementations.
+// Only macros are defined here to avoid ODR violations with the engine version.
+
+#include <Atom/Features/Debug.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
 #include <Atom/Features/BlendUtility.azsli>
-
-// This file provides utilities for common handling of inputs for the base color of PBR materials.
 
 // These macros can be used to declare common shader inputs for this feature. 
 // Use the COMMON_SRG_INPUTS_* macro in your material SRG definition, and use the COMMON_OPTIONS_* macro at the global scope in your shader. Then you can pass these variables to the Get*Input() function below.
@@ -27,34 +29,5 @@ Texture2D prefix##m_baseColorMap;
 option bool prefix##o_baseColor_useTexture; \
 option TextureBlendMode prefix##o_baseColorTextureBlendMode = TextureBlendMode::Multiply;
 
-float3 GetBaseColorInput(Texture2D map, sampler mapSampler, float2 uv, float3 baseColor, bool useTexture)
-{
-    if(useTexture)
-    {
-        float3 sampledAbledo = map.Sample(mapSampler, uv).rgb;
-        return TransformColor(sampledAbledo, ColorSpaceId::LinearSRGB, ColorSpaceId::ACEScg);
-    }
-    return baseColor;
-}
-
-float3 BlendBaseColor(float3 sampledBaseColor, float3 baseColor, float factor, TextureBlendMode blendMode, bool useTexture)
-{
-    // [GFX TODO][ATOM-1761] Figure out how we want our base material to expect channels to be encoded, and apply that to the way we pack alpha. 
-    if (useTexture)
-    {
-        // Depending on the blend mode, we need to flip the order of the colors in order to get a useful result.
-        if(blendMode == TextureBlendMode::Overlay)
-        {
-            baseColor = ApplyTextureBlend(sampledBaseColor, baseColor, factor, blendMode);
-        }
-        else
-        {
-            baseColor = ApplyTextureBlend(baseColor, sampledBaseColor, factor, blendMode);
-        }
-    }
-    else
-    {
-        baseColor *= factor;
-    }
-    return baseColor;
-}
+// GetBaseColorInput() and BlendBaseColor() are provided by the engine's BaseColorInput.azsli
+// which gets included through the engine's shader include chain.
