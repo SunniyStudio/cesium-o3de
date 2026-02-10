@@ -9,6 +9,9 @@
 #include <Cesium/Components/CesiumIonRasterOverlayComponent.h>
 #include <Cesium/Components/BingRasterOverlayComponent.h>
 #include <Cesium/Components/TMSRasterOverlayComponent.h>
+#include <Cesium/Components/WMSRasterOverlayComponent.h>
+#include <Cesium/Components/WMTSRasterOverlayComponent.h>
+#include <Cesium/Components/UrlTemplateRasterOverlayComponent.h>
 #include <Cesium/Components/CesiumMetadataComponent.h>
 #include <Cesium/Components/CesiumTilesetPhysicsComponent.h>
 #include "Cesium/Components/DynamicUiImageComponent.h"
@@ -37,7 +40,9 @@ namespace Cesium
                   TilesetCreditComponent::CreateDescriptor(), TilesetComponent::CreateDescriptor(), GltfModelComponent::CreateDescriptor(),
                   GeoReferenceCameraFlyController::CreateDescriptor(), RasterOverlayComponent::CreateDescriptor(),
                   BingRasterOverlayComponent::CreateDescriptor(), CesiumIonRasterOverlayComponent::CreateDescriptor(),
-                  TMSRasterOverlayComponent::CreateDescriptor(), CesiumMetadataComponent::CreateDescriptor(),
+                  TMSRasterOverlayComponent::CreateDescriptor(), WMSRasterOverlayComponent::CreateDescriptor(),
+                  WMTSRasterOverlayComponent::CreateDescriptor(), UrlTemplateRasterOverlayComponent::CreateDescriptor(),
+                  CesiumMetadataComponent::CreateDescriptor(),
                   CesiumTilesetPhysicsComponent::CreateDescriptor() });
         }
 

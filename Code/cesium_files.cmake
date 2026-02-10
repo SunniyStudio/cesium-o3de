@@ -122,6 +122,12 @@ set(FILES
     Source/Cesium/Components/TilesetCreditComponent.cpp
     Include/Cesium/Components/GltfModelComponent.h
     Source/Cesium/Components/GltfModelComponent.cpp
+    Include/Cesium/Components/WMSRasterOverlayComponent.h
+    Source/Cesium/Components/WMSRasterOverlayComponent.cpp
+    Include/Cesium/Components/WMTSRasterOverlayComponent.h
+    Source/Cesium/Components/WMTSRasterOverlayComponent.cpp
+    Include/Cesium/Components/UrlTemplateRasterOverlayComponent.h
+    Source/Cesium/Components/UrlTemplateRasterOverlayComponent.cpp
     Include/Cesium/Components/TilesetComponent.h
     Source/Cesium/Components/TilesetComponent.cpp
     Include/Cesium/Components/CesiumMetadataComponent.h
